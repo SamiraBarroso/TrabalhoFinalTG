@@ -17,6 +17,7 @@ private:
     unsigned int out_degree;
     float weight;
     Node *next_node;
+    int groupId;
 
 public:
     // Constructor
@@ -29,11 +30,14 @@ public:
     int getId();
     int getInDegree();
     int getOutDegree();
+    int getDegree();
     float getWeight();
     Node *getNextNode();
+    int getGroupId();
     // Setters
     void setNextNode(Node *node);
     void setWeight(float weight);
+    void setGroupId(int group_id);
     // Other methods
     bool searchEdge(int target_id);
     void insertEdge(int target_id, float weight, int id);

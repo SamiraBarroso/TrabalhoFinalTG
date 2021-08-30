@@ -4,12 +4,25 @@
 using namespace std;
 
 // Constructor
+Edge::Edge()
+{
+}
+
 Edge::Edge(int target_id, int id)
 {
 
     this->target_id = target_id;
     this->next_edge = nullptr;
     this->weight = 0;
+    this->origem = id;
+    this->destino = target_id;
+}
+Edge::Edge(int target_id, int id, float weight)
+{
+
+    this->target_id = target_id;
+    this->next_edge = nullptr;
+    this->weight = weight;
     this->origem = id;
     this->destino = target_id;
 }

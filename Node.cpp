@@ -50,6 +50,16 @@ int Node::getId()
     return this->id;
 }
 
+int Node::getGroupId()
+{
+    return groupId;
+}
+
+int Node::getDegree()
+{
+    return in_degree + out_degree;
+}
+
 int Node::getInDegree()
 {
 
@@ -189,6 +199,10 @@ bool Node::searchEdge(int target_id)
     return false;
 }
 
+void Node::setGroupId(int group_id)
+{
+    this->groupId = group_id;
+}
 void Node::incrementInDegree()
 {
 

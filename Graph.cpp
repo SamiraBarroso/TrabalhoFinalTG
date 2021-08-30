@@ -11,7 +11,7 @@ using namespace std;
 /**************************************************************************************************
  * Defining the Graph's methods
 **************************************************************************************************/
-typedef pair<int, int> Pair;
+//typedef pair<int, int> Pair;
 
 // Constructor
 Graph::Graph(int order, bool directed, bool weighted_edge, bool weighted_node)
@@ -24,6 +24,7 @@ Graph::Graph(int order, bool directed, bool weighted_edge, bool weighted_node)
     this->first_node = this->last_node = nullptr;
     this->number_edges = 0;
     this->nodesCount = 0;
+    number_Groups = 0;
 
     nodesList = new ListaEncad();
 }
@@ -93,18 +94,20 @@ int Graph::getNodeCount()
     This allows the correct updating of the numbers of edges in the graph being directed or not.
 */
 
-void Graph::insertNode(int id, float weight)
+void Graph::insertNode(int id, float weight, int groupId)
 {
     Node *newNode = new Node(id);
     nodesCount++;
-    // nodesList.push_back(*newNode);
     nodesList->insereFinal(newNode);
 
     if (this->weighted_node)
     {
         newNode->setWeight(weight);
     }
-
+    if (groupId != -1)
+    {
+        newNode->setGroupId(groupId);
+    }
     if (this->first_node != nullptr)
     {
         this->last_node->setNextNode(newNode);
@@ -121,12 +124,12 @@ void Graph::insertEdge(int id, int target_id, float weight)
 {
     if (!this->searchNode(id))
     {
-        this->insertNode(id, 0);
+        this->insertNode(id, 0, -1);
     }
 
     if (!this->searchNode(target_id))
     {
-        this->insertNode(target_id, 0);
+        this->insertNode(target_id, 0, -1);
     }
 
     if (this->directed)
@@ -261,11 +264,25 @@ void Graph::imprimeGrafo()
 
         while (aux != nullptr)
         {
-            cout << "no: " << aux->getId();
+            if (getWeightedNode())
+            {
+                cout << aux->getId() << "(" << aux->getWeight() << "):";
+            }
+            else
+            {
+                cout << aux->getId() << ":";
+            }
             Edge *auxEdge = aux->getFirstEdge();
             while (auxEdge != NULL)
             {
-                cout << "  -->  edge: " << auxEdge->getIdDestino();
+                if (getWeightedEdge())
+                {
+                    cout << " -> edge: " << auxEdge->getTargetId() << " (" << auxEdge->getWeight() << ")";
+                }
+                else
+                {
+                    std::cout << " -> edge: " << auxEdge->getTargetId();
+                }
                 auxEdge = auxEdge->getNextEdge();
             }
             cout << endl;
@@ -276,7 +293,7 @@ void Graph::imprimeGrafo()
     }
     else
     {
-        cout << "Grafo vazio";
+        cout << "Grafo vazio" << endl;
     }
 }
 void Graph::removeAllEdges(int id)
@@ -306,6 +323,24 @@ bool Graph::hasEdgeBetween(int origem, int destino)
     }
     return false;
 }
+Edge *Graph::getEdgeBetween(int origem, int destino)
+{
+    Node *node = this->first_node;
+    while (node != nullptr)
+    {
+        Edge *edge = node->getFirstEdge();
+        while (edge != nullptr)
+        {
+            if (node->getId() == origem && edge->getTargetId() == destino)
+            {
+                return edge;
+            }
+            edge = edge->getNextEdge();
+        }
+        node = node->getNextNode();
+    }
+    return nullptr;
+}
 
 int Graph::grauGrafo()
 {
@@ -323,6 +358,10 @@ int Graph::grauGrafo()
         node = node->getNextNode();
     }
     return i;
+}
+void Graph::setNumberGroups(int n)
+{
+    number_Groups = n;
 }
 
 ////////////////////////////////////////////////////FECHOS//////////////////////////////////////////////////////////////////////////////
@@ -381,11 +420,11 @@ void Graph::fechoTransitivoDireto(int idNode, ofstream &saida)
         cout << "Fecho Transitivo Direto impossivel: o grafo nao eh Direcionado." << endl;
         return;
     }
-    if (this->ciclo())
-    {
-        cout << "Fecho Transitivo Direto impossivel: o grafo possui Ciclos. \n";
-        return;
-    }
+    // if (this->ciclo())
+    // {
+    //     cout << "Fecho Transitivo Direto impossivel: o grafo possui Ciclos. \n";
+    //     return;
+    // }
 
     bool *visitado = new bool[this->getOrder()]; //vetor para controlar nós visitados
     for (int i = 0; i < this->getOrder(); i++)   //seta todos as posicoes para nao visitado
@@ -435,11 +474,11 @@ void Graph::fechoTransitivoIndireto(int idNode, ofstream &saida)
         cout << "Fecho Transitivo Inireto impossivel: o grafo nao eh direcionado." << endl;
         return;
     }
-    if (this->ciclo())
-    {
-        cout << "Fecho Transitivo Direto impossivel: o grafo possui Ciclos. \n";
-        return;
-    }
+    // if (this->ciclo())
+    // {
+    //     cout << "Fecho Transitivo Direto impossivel: o grafo possui Ciclos. \n";
+    //     return;
+    // }
 
     stack<int> pilha;
     pilha.push(idNode);
@@ -485,11 +524,11 @@ void Graph::ordenacaoTopologica(ofstream &saida)
         cout << "Ordenacao Topologica impossivel: o grafo eh nao-direcionado." << endl;
         return;
     }
-    else if (this->ciclo())
-    {
-        cout << "Ordenacao Topologica impossível: Grafo ciclico." << endl;
-        return;
-    }
+    // else if (this->ciclo())
+    // {
+    //     cout << "Ordenacao Topologica impossível: Grafo ciclico." << endl;
+    //     return;
+    // }
     else
     {
         list<int> ordenacaoTopologica;
@@ -676,7 +715,7 @@ Graph *Graph::subGrafoInduzido(int *vet, int tam, ofstream &saida)
         }
         if (subgrafo->nodesList->busca(vet[i]) == false) //verifica se o elemento do subconjunto de vertices ja esta no subgrafo
         {
-            subgrafo->insertNode(vet[i], 0); //se nao estiver, insere no subgrafo
+            subgrafo->insertNode(vet[i], 0, -1); //se nao estiver, insere no subgrafo
         }
 
         int ind = retornaIndice(vertices, n, vet[i]);

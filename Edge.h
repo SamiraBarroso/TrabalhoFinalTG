@@ -20,7 +20,9 @@ private:
 
 public:
     // Constructor
+    Edge();
     Edge(int target_id, int id);
+    Edge(int target_id, int id, float weight);
     // Destructor
     ~Edge();
     // Getters
@@ -34,7 +36,6 @@ public:
     // Setters
     void setNextEdge(Edge *edge);
     void setWeight(float weight);
-
     void setOrigem(int id_origem);
     void setDestino(int id_destino);
 };

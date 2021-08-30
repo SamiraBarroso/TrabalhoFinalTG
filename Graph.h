@@ -37,6 +37,7 @@ private:
     Node *first_node;
     Node *last_node;
     int nodesCount;
+    int number_Groups;
 
     int cont; //variavel para preencher a lista pares
 
@@ -63,15 +64,17 @@ public:
     int getNodeCount();
 
     //Other methods
-    void insertNode(int id, float weight);
+    void insertNode(int id, float weight, int groupId);
     void insertEdge(int id, int target_id, float weight);
     void removeNode(int id);
     bool searchNode(int id);
     Node *getNode(int id);
+    Edge *getEdgeBetween(int id, int targetId);
     void imprimeGrafo();
     void removeAllEdges(int id);
     bool hasEdgeBetween(int origem, int destino);
     int grauGrafo();
+    void setNumberGroups(int n);
 
     //methods phase1
 
