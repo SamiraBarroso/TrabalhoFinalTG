@@ -97,74 +97,97 @@ void printProgress(double percentage)
     printf("\r%3d%% [%.*s%*s]", val, lpad, PBSTR, rpad, "");
     fflush(stdout);
 }
-Graph *leituraVariacao(ifstream &input_file, int directed, int weightedEdge, int weightedNode)
+Graph *leituraVariacao(ifstream &input_file, int directed, int weightedEdge, int weightedNode, int nG, int nV)
 {
-    int numberGroups;
-    int order;
+    int numberGroups = nG, order = nV;
+    int nodeId, targetId, groupId, numEdges = 0, cont = 0;
+    float edgeWeight;
 
-    cout << "Digite o numero de grupos: ";
-    cin >> numberGroups;
-
-    cout << "Digite a quantidade de vertices: ";
-    cin >> order;
+    cout << "Qunatidade de grupos: " << numberGroups << endl;
+    cout << "Quantidade de vertices: " << order << endl;
 
     //Criando objeto grafo
     Graph *graph = new Graph(order, directed, weightedEdge, weightedNode);
     graph->setNumberGroups(numberGroups);
 
-    // Count number of edges in file
-    int numEdges = 0;
+    // Contando o numero de arestas do arquivo de instancias
     string unused;
     while (getline(input_file, unused))
-    {
         ++numEdges;
-    }
 
     input_file.clear();
     input_file.seekg(0, std::ios::beg);
 
     numEdges -= (1 + order);
 
-    // Insert nodes
-    int groupId;
+    // Inserindo os vertices
     for (int i = 0; i < order; i++)
     {
         input_file >> groupId;
         graph->insertNode(i, 0, groupId);
     }
 
-    // Insert edges
-    int nodeId;
-    int targetId;
-    float edgeWeight;
-
-    int counter = 0;
+    // Inserindo as arestas
     while (input_file >> nodeId >> targetId >> edgeWeight)
     {
-        float progress = (float(counter) * 100) / float(numEdges);
+        float progress = (float(cont) * 100) / float(numEdges);
         printProgress(progress / 100);
         graph->insertEdge(nodeId, targetId, edgeWeight);
-        counter++;
+        cont++;
     }
     cout << endl;
     return graph;
 }
 
+int numGrupos(string &str)
+{
+    string grupo;
+    int i = 0;
+
+    while (str[i] != '.')
+    {
+        if (isdigit(str[i]) == 1)
+        {
+            grupo += str[i];
+        }
+        else
+            break;
+        i++;
+    }
+    return atoi(grupo.c_str());
+}
+
+int numVertices(string &str, string n)
+{
+    string vertice;
+    int i = 0;
+    string s = str.substr(str.find_first_of(n[n.length() - 1]) + 1);
+    while (s[i] != '.')
+    {
+
+        if (isdigit(s[i]) == 1)
+            vertice += s[i];
+
+        i++;
+    }
+    return atoi(vertice.c_str());
+}
+
 Graph *leitura2(string &input_file_name, ifstream &input_file,
                 int directed, int weightedEdge, int weightedNode)
 {
-    // Get file extension
-    string fileExtension = input_file_name.substr(input_file_name.find_first_of(".") + 1);
+    //Armazenando em uma string o tipo do arquivo(txt, clu, gr3 ...)
+    string tipoArquivo = input_file_name.substr(input_file_name.find_first_of(".") + 1);
     cout << input_file_name << "\n";
-    cout << fileExtension << "\n";
+    cout << tipoArquivo << "\n";
 
-    if (fileExtension == "txt")
-    { //leitura para arquivos txts
+    if (tipoArquivo == "txt") //se for txt faz a leitura das instancias normal, como no trabalho 1
         return leitura(input_file, directed, weightedEdge, weightedNode);
-    }
-    else
-    { //leitura para os arquivos diferentes
-        return leituraVariacao(input_file, directed, weightedEdge, weightedNode);
+
+    else //leitura para os arquivos diferentes
+    {
+        int nG = numGrupos(input_file_name), nV = numVertices(input_file_name, to_string(nG));
+        return leituraVariacao(input_file, directed, weightedEdge, weightedNode, nG, nV);
     }
 }
 
@@ -406,7 +429,6 @@ int main(int argc, char const *argv[])
         //graph = leitura(input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
         // graph.print();
         graph = leitura2(input_file_name, input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
-        cout << "Order: " << graph->getOrder() << "\n";
         // Chamando main menu
         mainMenu(output_file, graph);
     }
