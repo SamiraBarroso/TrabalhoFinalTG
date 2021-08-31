@@ -5,6 +5,7 @@
 #include <string.h>  // memset
 #include <string>
 #include <queue>
+#include <time.h>
 // #include <bits/stdc++.h>
 #define INF 9999
 using namespace std;
@@ -1311,4 +1312,70 @@ void Graph::dijkstra(int origem, int destino, ofstream &saida)
               << aux << "\n";
     }
     saida << "}";
+}
+
+float Graph::greed(ofstream &saida)
+{
+    clock_t tInicio, tFim, tDecorrido;
+    tInicio = clock();
+
+    vector<Par> vetEdges = this->arestas;
+    sort(vetEdges.begin(), vetEdges.end());
+    vector<Par> T;
+    int somaPesos = 0, num = this->number_Groups;
+    int *subArvore = new int(this->order);
+
+    int *vGroup = new int(number_Groups);
+    // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
+    //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0)
+    memset(vGroup, 0, sizeof(int) * number_Groups);
+
+    while (num > 1)
+    {
+        Par edge = vetEdges.front();
+        vetEdges.erase(vetEdges.begin());
+
+        int u = buscar(subArvore, edge.u->getId());
+        int v = buscar(subArvore, edge.v->getId());
+
+        // se forem diferentes é porque não formam ciclo, ou seja, nao estao na mesma subarvore
+        //entao podemos incluir a aresta no vetor, e depois marcar que as duas subarvores são uma
+        //única subarvore
+        if (u != v)
+        {
+            if (edge.u != nullptr && edge.v != nullptr)
+            {
+                int gu = edge.u->getGroupId();
+                int gv = edge.v->getGroupId();
+
+                if ((vGroup[gu - 1] == edge.u->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == edge.v->getId() || vGroup[gv - 1] == 0))
+                {
+                    T.push_back(edge);
+                    unir(subArvore, u, v); // faz a união
+                    somaPesos += edge.weight;
+
+                    num--;
+                    if (vGroup[gu - 1] == 0)
+                    {
+                        vGroup[gu - 1] = edge.u->getId();
+                    }
+                    if (vGroup[gv - 1] == 0)
+                    {
+                        vGroup[gv - 1] = edge.v->getId();
+                    }
+                }
+            }
+        }
+    }
+    tFim = clock();
+    tDecorrido = ((tFim - tInicio) / (CLOCKS_PER_SEC / 1000));
+
+    saida << "Tempo: " << tDecorrido << "ms \n";
+    saida << "Total Peso: " << somaPesos << "\n";
+}
+float Graph::greedRandom()
+{
+}
+float Graph::greedRactiveRandom()
+{
 }

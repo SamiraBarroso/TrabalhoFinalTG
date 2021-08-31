@@ -121,7 +121,7 @@ public:
     void dijkstra(int orig, int dest, ofstream &saida);
 
     //methods phase1
-    float greed();
+    float greed(ofstream &saida);
     float greedRandom();
     float greedRactiveRandom();
 

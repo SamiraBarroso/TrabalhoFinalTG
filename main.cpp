@@ -88,56 +88,7 @@ Graph *leitura(ifstream &input_file, int directed, int weightedEdge, int weighte
 
     return graph;
 }
-Graph *leituraTxt(ifstream &input_file, int directed, int weightedEdge, int weightedNode)
-{
-    int order;
-    int idNodeSource;
-    int idNodeTarget;
 
-    input_file >> order;
-    //Criando objeto grafo
-    Graph *graph = new Graph(order, directed, weightedEdge, weightedNode);
-
-    if (!graph->getWeightedEdge() && !graph->getWeightedNode())
-    {
-        while (input_file >> idNodeSource >> idNodeTarget)
-        {
-            graph->insertEdge(idNodeSource, idNodeTarget, 0);
-        }
-    }
-    else if (graph->getWeightedEdge() && !graph->getWeightedNode())
-    {
-        float edgeWeight;
-
-        while (input_file >> idNodeSource >> idNodeTarget >> edgeWeight)
-        {
-            graph->insertEdge(idNodeSource, idNodeTarget, edgeWeight);
-        }
-    }
-    else if (graph->getWeightedNode() && !graph->getWeightedEdge())
-    {
-        float nodeSourceWeight, nodeTargetWeight;
-
-        while (input_file >> idNodeSource >> nodeSourceWeight >> idNodeTarget >> nodeTargetWeight)
-        {
-            graph->insertEdge(idNodeSource, idNodeTarget, 0);
-            graph->getNode(idNodeSource)->setWeight(nodeSourceWeight);
-            graph->getNode(idNodeTarget)->setWeight(nodeTargetWeight);
-        }
-    }
-    else if (graph->getWeightedNode() && graph->getWeightedEdge())
-    {
-        float nodeSourceWeight, nodeTargetWeight, edgeWeight;
-
-        while (input_file >> idNodeSource >> nodeSourceWeight >> idNodeTarget >> nodeTargetWeight)
-        {
-            graph->insertEdge(idNodeSource, idNodeTarget, edgeWeight);
-            graph->getNode(idNodeSource)->setWeight(nodeSourceWeight);
-            graph->getNode(idNodeTarget)->setWeight(nodeTargetWeight);
-        }
-    }
-    return graph;
-}
 void printProgress(double percentage)
 {
     int val = (int)(percentage * 100);
@@ -148,22 +99,22 @@ void printProgress(double percentage)
 }
 Graph *leituraVariacao(ifstream &input_file, int directed, int weightedEdge, int weightedNode)
 {
-    int numberOfGroups;
-    int numberOfNodes;
+    int numberGroups;
+    int order;
 
-    std::cout << "Enter the number of groups: ";
-    std::cin >> numberOfGroups;
+    cout << "Digite o numero de grupos: ";
+    cin >> numberGroups;
 
-    std::cout << "Enter the number of nodes: ";
-    std::cin >> numberOfNodes;
+    cout << "Digite a quantidade de vertices: ";
+    cin >> order;
 
     //Criando objeto grafo
-    Graph *graph = new Graph(numberOfNodes, directed, weightedEdge, weightedNode);
-    graph->setNumberGroups(numberOfGroups);
+    Graph *graph = new Graph(order, directed, weightedEdge, weightedNode);
+    graph->setNumberGroups(numberGroups);
 
     // Count number of edges in file
     int numEdges = 0;
-    std::string unused;
+    string unused;
     while (getline(input_file, unused))
     {
         ++numEdges;
@@ -172,11 +123,11 @@ Graph *leituraVariacao(ifstream &input_file, int directed, int weightedEdge, int
     input_file.clear();
     input_file.seekg(0, std::ios::beg);
 
-    numEdges -= (1 + numberOfNodes);
+    numEdges -= (1 + order);
 
     // Insert nodes
     int groupId;
-    for (int i = 0; i < numberOfNodes; i++)
+    for (int i = 0; i < order; i++)
     {
         input_file >> groupId;
         graph->insertNode(i, 0, groupId);
@@ -199,31 +150,6 @@ Graph *leituraVariacao(ifstream &input_file, int directed, int weightedEdge, int
     return graph;
 }
 
-Graph *leituraInstancia(ifstream &input_file, int directed, int weightedEdge, int weightedNode)
-{
-
-    //Variáveis para auxiliar na criação dos nós no Grafo
-    int idNodeSource;
-    int idNodeTarget;
-    int order;
-    int numEdges;
-
-    //Pegando a ordem do grafo
-    input_file >> order >> numEdges;
-
-    //Criando objeto grafo
-    Graph *graph = new Graph(order, directed, weightedEdge, weightedNode);
-
-    //Leitura de arquivo
-    while (input_file >> idNodeSource >> idNodeTarget)
-    {
-
-        graph->insertEdge(idNodeSource, idNodeTarget, 0);
-    }
-
-    return graph;
-}
-
 Graph *leitura2(string &input_file_name, ifstream &input_file,
                 int directed, int weightedEdge, int weightedNode)
 {
@@ -233,11 +159,11 @@ Graph *leitura2(string &input_file_name, ifstream &input_file,
     cout << fileExtension << "\n";
 
     if (fileExtension == "txt")
-    {
-        return leituraTxt(input_file, directed, weightedEdge, weightedNode);
+    { //leitura para arquivos txts
+        return leitura(input_file, directed, weightedEdge, weightedNode);
     }
     else
-    {
+    { //leitura para os arquivos diferentes
         return leituraVariacao(input_file, directed, weightedEdge, weightedNode);
     }
 }
@@ -393,7 +319,16 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     }
     case 11: //Guloso
     {
-        cout << "Nao implementado" << endl;
+        string arquivo = "tests/test_guloso.txt";
+        ofstream saida(arquivo);
+
+        if (saida.is_open())
+        {
+            graph->greed(saida);
+            saida.close();
+        }
+        else
+            cout << "Arquivo nao pode ser aberto" << endl;
         break;
     }
     case 12: //Guloso Randomizado
