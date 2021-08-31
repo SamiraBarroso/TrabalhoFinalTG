@@ -41,7 +41,8 @@ private:
 
     int cont; //variavel para preencher a lista pares
 
-    vector<Par> arestas; // vetor de arestas para o algoritmo de Kruskal
+    vector<Par> arestas;     // vetor de arestas para o algoritmo de Kruskal
+    vector<Edge> arestasVet; //vetor de arestas para o algoritmo Guloso
 
     //list<Node> nodesList; //lista de nos do grafo
     ListaEncad *nodesList;

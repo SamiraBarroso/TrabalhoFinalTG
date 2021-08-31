@@ -38,6 +38,10 @@ public:
     void setWeight(float weight);
     void setOrigem(int id_origem);
     void setDestino(int id_destino);
+    bool operator<(const Edge &edge2) const
+    {
+        return (weight < edge2.weight);
+    }
 };
 
 #endif // EDGE_H_INCLUDED

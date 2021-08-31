@@ -146,8 +146,8 @@ void Graph::insertEdge(int id, int target_id, float weight)
             arestas.push_back(par);
 
             node->insertEdge(target_id, weight, node->getId());
-
-            // pares[node->getId()].push_back(make_pair(targetNode->getId(), weight));
+            Edge edgeaux(target_id, id, weight);
+            arestasVet.push_back(edgeaux);
 
             number_edges++;
         }
@@ -166,7 +166,8 @@ void Graph::insertEdge(int id, int target_id, float weight)
             arestas.push_back(par);
             node->insertEdge(target_id, weight, node->getId());
 
-            // pares[node->getId()].push_back(make_pair(targetNode->getId(), weight));
+            Edge edgeaux(target_id, id, weight);
+            this->arestasVet.push_back(edgeaux);
 
             number_edges++;
         }
@@ -178,10 +179,10 @@ void Graph::insertEdge(int id, int target_id, float weight)
             par.v = targetNode;
             par.weight = weight;
             arestas.push_back(par);
-
             targetNode->insertEdge(id, weight, target_id);
 
-            // pares[node->getId()].push_back(make_pair(targetNode->getId(), weight));
+            Edge edgeaux(target_id, id, weight);
+            this->arestasVet.push_back(edgeaux);
 
             number_edges++;
         }
@@ -1319,12 +1320,12 @@ float Graph::greed(ofstream &saida)
     clock_t tInicio, tFim, tDecorrido;
     tInicio = clock();
 
-    vector<Par> vetEdges = this->arestas;
+    std::vector<Edge> vetEdges = this->arestasVet;
     sort(vetEdges.begin(), vetEdges.end());
-    vector<Par> T;
+    std::vector<Edge> T;
     int somaPesos = 0, num = this->number_Groups;
     int *subArvore = new int(this->order);
-
+    memset(subArvore, -1, sizeof(int) * this->order);
     int *vGroup = new int(number_Groups);
     // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
     //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0)
@@ -1332,36 +1333,38 @@ float Graph::greed(ofstream &saida)
 
     while (num > 1)
     {
-        Par edge = vetEdges.front();
+        Edge edge = vetEdges.front();
         vetEdges.erase(vetEdges.begin());
 
-        int u = buscar(subArvore, edge.u->getId());
-        int v = buscar(subArvore, edge.v->getId());
+        int u = buscar(subArvore, edge.getIdOrigem());
+        int v = buscar(subArvore, edge.getIdDestino());
 
         // se forem diferentes é porque não formam ciclo, ou seja, nao estao na mesma subarvore
         //entao podemos incluir a aresta no vetor, e depois marcar que as duas subarvores são uma
         //única subarvore
         if (u != v)
         {
-            if (edge.u != nullptr && edge.v != nullptr)
+            Node *nodeU = getNode(edge.getIdOrigem());
+            Node *nodeV = getNode(edge.getIdDestino());
+            if (nodeU != nullptr && nodeV != nullptr)
             {
-                int gu = edge.u->getGroupId();
-                int gv = edge.v->getGroupId();
+                int gu = nodeU->getGroupId();
+                int gv = nodeV->getGroupId();
 
-                if ((vGroup[gu - 1] == edge.u->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == edge.v->getId() || vGroup[gv - 1] == 0))
+                if ((vGroup[gu - 1] == nodeU->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == nodeV->getId() || vGroup[gv - 1] == 0))
                 {
                     T.push_back(edge);
                     unir(subArvore, u, v); // faz a união
-                    somaPesos += edge.weight;
+                    somaPesos += edge.getWeight();
 
                     num--;
                     if (vGroup[gu - 1] == 0)
                     {
-                        vGroup[gu - 1] = edge.u->getId();
+                        vGroup[gu - 1] = nodeU->getId();
                     }
                     if (vGroup[gv - 1] == 0)
                     {
-                        vGroup[gv - 1] = edge.v->getId();
+                        vGroup[gv - 1] = nodeV->getId();
                     }
                 }
             }
