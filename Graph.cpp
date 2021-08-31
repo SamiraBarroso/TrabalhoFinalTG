@@ -1315,23 +1315,28 @@ void Graph::dijkstra(int origem, int destino, ofstream &saida)
     saida << "}";
 }
 
+/////////////////////////////////////////////////////////ALGORITMO GULOSO/////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 float Graph::greed(ofstream &saida)
 {
-    clock_t tInicio, tFim, tDecorrido;
-    tInicio = clock();
+    //Variaveis para armazenar o tempo do algoritmo
+    clock_t tempoInicial, tempoFinal, tempoTotal;
+    tempoInicial = clock();
+    int somaPesos = 0, componentesConexa = this->number_Groups;
 
-    std::vector<Edge> vetEdges = this->arestasVet;
-    sort(vetEdges.begin(), vetEdges.end());
-    std::vector<Edge> T;
-    int somaPesos = 0, num = this->number_Groups;
-    int *subArvore = new int(this->order);
-    memset(subArvore, -1, sizeof(int) * this->order);
+    vector<Edge> vetEdges = this->arestasVet; //lista com arestas do grafo
+    sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
+    vector<Edge> solucao;                     //conjunto solucao de arestas
+    int *subArvore = new int(this->order);    // |V| subarvores contendo cada uma um no isolado
     int *vGroup = new int(number_Groups);
+
     // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
-    //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0)
+    //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0/-1)
+    memset(subArvore, -1, sizeof(int) * this->order);
     memset(vGroup, 0, sizeof(int) * number_Groups);
 
-    while (num > 1)
+    while (componentesConexa > 1) //o algoritmo termina quando o Conjunto Solucao possui apenas uma componente conexa
     {
         Edge edge = vetEdges.front();
         vetEdges.erase(vetEdges.begin());
@@ -1344,36 +1349,38 @@ float Graph::greed(ofstream &saida)
         //única subarvore
         if (u != v)
         {
-            Node *nodeU = getNode(edge.getIdOrigem());
-            Node *nodeV = getNode(edge.getIdDestino());
-            if (nodeU != nullptr && nodeV != nullptr)
+            Node *vertice_U = getNode(edge.getIdOrigem());
+            Node *vertice_V = getNode(edge.getIdDestino());
+            if (vertice_U != nullptr && vertice_V != nullptr)
             {
-                int gu = nodeU->getGroupId();
-                int gv = nodeV->getGroupId();
+                int gu = vertice_U->getGroupId();
+                int gv = vertice_V->getGroupId();
 
-                if ((vGroup[gu - 1] == nodeU->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == nodeV->getId() || vGroup[gv - 1] == 0))
+                //Alem da deteccao de ciclos eh preciso verificar se os grupos gu e gv possuem vertices diferesnte
+                //de u e v na solucao
+                if ((vGroup[gu - 1] == vertice_U->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == vertice_V->getId() || vGroup[gv - 1] == 0))
                 {
-                    T.push_back(edge);
-                    unir(subArvore, u, v); // faz a união
+                    solucao.push_back(edge);
                     somaPesos += edge.getWeight();
+                    unir(subArvore, u, v); // faz a união das subarvores que contem u e v
 
-                    num--;
+                    componentesConexa--;
                     if (vGroup[gu - 1] == 0)
                     {
-                        vGroup[gu - 1] = nodeU->getId();
+                        vGroup[gu - 1] = vertice_U->getId();
                     }
                     if (vGroup[gv - 1] == 0)
                     {
-                        vGroup[gv - 1] = nodeV->getId();
+                        vGroup[gv - 1] = vertice_V->getId();
                     }
                 }
             }
         }
     }
-    tFim = clock();
-    tDecorrido = ((tFim - tInicio) / (CLOCKS_PER_SEC / 1000));
+    tempoFinal = clock();
+    tempoTotal = ((tempoFinal - tempoInicial) / (CLOCKS_PER_SEC / 1000));
 
-    saida << "Tempo: " << tDecorrido << "ms \n";
+    saida << "Tempo: " << tempoTotal << "ms \n";
     saida << "Total Peso: " << somaPesos << "\n";
 }
 float Graph::greedRandom()
