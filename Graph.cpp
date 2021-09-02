@@ -1318,7 +1318,7 @@ void Graph::dijkstra(int origem, int destino, ofstream &saida)
 /////////////////////////////////////////////////////////ALGORITMO GULOSO/////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float Graph::greed(ofstream &saida)
+void Graph::greed(ofstream &saida)
 {
     //Variaveis para armazenar o tempo do algoritmo
     clock_t tempoInicial, tempoFinal, tempoTotal;
@@ -1382,9 +1382,124 @@ float Graph::greed(ofstream &saida)
 
     saida << "Tempo: " << tempoTotal << "ms \n";
     saida << "Total Peso: " << somaPesos << "\n";
+    saida << "graph Greedy {\n";
+    for (int i = 0; i < solucao.size(); i++)
+    {
+        saida << "\t" << solucao.at(i).getIdOrigem() << " -- " << solucao.at(i).getIdDestino() << " [label=" << solucao.at(i).getWeight() << "]\n";
+    }
+    saida << "}\n";
 }
-float Graph::greedRandom()
+vector<Edge> Graph::constroiLCR(vector<Edge> vetEdges, float alpha)
 {
+    // vector<Edge> newLista;
+    // int cMin = 0, cMax = 0;
+    // for (int i = 0; i < vetEdges.size(); i++)
+    // {
+    //     cMin = vetEdges[i].getWeight();
+    //     cMax = vetEdges[vetEdges.size()].getWeight();
+
+    //     if (vetEdges[i].getWeight() <= (cMin + alpha * (cMax - cMin)))
+    //     {
+    //         newLista.push_back(vetEdges[i]);
+    //     }
+    // }
+    // return newLista;
+    float c_min = vetEdges.begin()->getWeight();
+    float c_max = vetEdges.back().getWeight();
+    float c_total = (c_min + (alpha * (c_max - c_min)));
+
+    vector<Edge> result;
+    for (int i = 0; i < vetEdges.size(); i++)
+    {
+        if (vetEdges[i].getWeight() <= c_total)
+        {
+            result.push_back(vetEdges[i]);
+        }
+    }
+
+    return result;
+}
+void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
+{
+    //Variaveis para armazenar o tempo do algoritmo
+    clock_t tempoInicial, tempoFinal, tempoTotal;
+    tempoInicial = clock();
+    int somaPesos = 0, componentesConexa = this->number_Groups;
+
+    vector<Edge> vetEdges = this->arestasVet; //lista com arestas do grafo
+    sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
+    vector<Edge> solucao;                     //conjunto solucao de arestas
+    int *subArvore = new int(this->order);    // |V| subarvores contendo cada uma um no isolado
+    int *vGroup = new int(number_Groups);
+    vector<Edge> LCR;
+
+    // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
+    //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0/-1)
+    memset(subArvore, -1, sizeof(int) * this->order);
+    memset(vGroup, 0, sizeof(int) * number_Groups);
+
+    while (componentesConexa > 1) //o algoritmo termina quando o Conjunto Solucao possui apenas uma componente conexa
+    {
+        LCR = constroiLCR(vetEdges, alpha);
+        srand(time(NULL));
+        int val = rand() % LCR.size();
+        Edge edge = LCR[val];
+
+        for (int i = 0; i < vetEdges.size(); i++)
+        {
+            if (vetEdges[i].getIdOrigem() == edge.getIdOrigem() && vetEdges[i].getIdDestino() == edge.getIdDestino())
+            {
+                vetEdges.erase(vetEdges.begin() + i);
+            }
+        }
+
+        int u = buscar(subArvore, edge.getIdOrigem());
+        int v = buscar(subArvore, edge.getIdDestino());
+
+        // se forem diferentes é porque não formam ciclo, ou seja, nao estao na mesma subarvore
+        //entao podemos incluir a aresta no vetor, e depois marcar que as duas subarvores são uma
+        //única subarvore
+        if (u != v)
+        {
+            Node *vertice_U = getNode(edge.getIdOrigem());
+            Node *vertice_V = getNode(edge.getIdDestino());
+            if (vertice_U != nullptr && vertice_V != nullptr)
+            {
+                int gu = vertice_U->getGroupId();
+                int gv = vertice_V->getGroupId();
+
+                //Alem da deteccao de ciclos eh preciso verificar se os grupos gu e gv possuem vertices diferesnte
+                //de u e v na solucao
+                if ((vGroup[gu - 1] == vertice_U->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == vertice_V->getId() || vGroup[gv - 1] == 0))
+                {
+                    solucao.push_back(edge);
+                    somaPesos += edge.getWeight();
+                    unir(subArvore, u, v); // faz a união das subarvores que contem u e v
+
+                    componentesConexa--;
+                    if (vGroup[gu - 1] == 0)
+                    {
+                        vGroup[gu - 1] = vertice_U->getId();
+                    }
+                    if (vGroup[gv - 1] == 0)
+                    {
+                        vGroup[gv - 1] = vertice_V->getId();
+                    }
+                }
+            }
+        }
+    }
+    tempoFinal = clock();
+    tempoTotal = ((tempoFinal - tempoInicial) / (CLOCKS_PER_SEC / 1000));
+
+    saida << "Tempo: " << tempoTotal << "ms \n";
+    saida << "Total Peso: " << somaPesos << "\n";
+    saida << "graph Greedy Random {\n";
+    for (int i = 0; i < solucao.size(); i++)
+    {
+        saida << "\t" << solucao.at(i).getIdOrigem() << " -- " << solucao.at(i).getIdDestino() << " [label=" << solucao.at(i).getWeight() << "]\n";
+    }
+    saida << "}\n";
 }
 float Graph::greedRactiveRandom()
 {

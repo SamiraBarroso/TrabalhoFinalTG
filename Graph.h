@@ -122,8 +122,9 @@ public:
     void dijkstra(int orig, int dest, ofstream &saida);
 
     //methods phase1
-    float greed(ofstream &saida);
-    float greedRandom();
+    void greed(ofstream &saida);
+    vector<Edge> constroiLCR(vector<Edge> vetEdges, float alpha);
+    void greedRandom(ofstream &saida, float alpha, int iteracoes);
     float greedRactiveRandom();
 
 private:

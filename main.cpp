@@ -356,7 +356,26 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     }
     case 12: //Guloso Randomizado
     {
-        cout << "Nao implementado" << endl;
+        string arquivo = "tests/test_guloso_Randomizado.txt";
+        ofstream saida(arquivo);
+        float alpha;
+        int iteracoes;
+
+        if (saida.is_open())
+        {
+            cout << "Escolha um valor de alpha: " << endl;
+            cin >> alpha;
+            cout << "Escolha a quantidade de iteracoes: " << endl;
+            cin >> iteracoes;
+
+            if (alpha > 0 && alpha < 1)
+                graph->greedRandom(saida, alpha, iteracoes);
+            else
+                cout << "Alpha invalido! Alpha deve estar entre 0 e 1." << endl;
+            saida.close();
+        }
+        else
+            cout << "Arquivo nao pode ser aberto" << endl;
         break;
     }
     case 13: //Guloso Randomizado Reativo
