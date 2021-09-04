@@ -342,7 +342,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     }
     case 11: //Guloso
     {
-        string arquivo = "tests/test_guloso.txt";
+        string arquivo = "saidaResultados/test_guloso.txt";
         ofstream saida(arquivo);
 
         if (saida.is_open())
@@ -356,7 +356,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     }
     case 12: //Guloso Randomizado
     {
-        string arquivo = "tests/test_guloso_Randomizado.txt";
+        string arquivo = "saidaResultados/test_guloso_Randomizado.txt";
         ofstream saida(arquivo);
         float alpha;
         int iteracoes;
@@ -428,9 +428,6 @@ int main(int argc, char const *argv[])
         string instance = input_file_name.substr(input_file_name.find("v"));
         cout << "Executando " << program_name << " com instancia " << instance << " ... " << endl;
     }
-
-    // Criando a pasta para armazenar os resultados
-    mkdir("tests");
 
     //Abrindo arquivo de entrada
     ifstream input_file;

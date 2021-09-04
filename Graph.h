@@ -92,7 +92,7 @@ public:
     //void breadthFirstSearch(ofstream &output_file);
     //Busca Profundidade
     void caminhamentoProfundidade(int x, ofstream &saida);
-    void auxBuscaEmProfundidade(int x, bool *verificavisitado, ofstream &saida, string nodesSeparator);
+    void auxBuscaEmProfundidade(int x, bool *verificavisitado, ofstream &saida, string seta);
 
     //Graph *getVertexInduced(int *listIdNodes);
     //Subgrafo induzido

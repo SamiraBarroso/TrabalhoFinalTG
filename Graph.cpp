@@ -437,13 +437,13 @@ void Graph::fechoTransitivoDireto(int idNode, ofstream &saida)
     stack<int> pilha;
     pilha.push(idNode);
 
-    string graphType;
-    string nodesSeparator;
+    string tipoGrafo;
+    string seta;
 
-    graphType = "digraph";
-    nodesSeparator = "->";
+    tipoGrafo = "digraph";
+    seta = "->";
 
-    saida << graphType << "Fecho Transitivo Direto {\n";
+    saida << tipoGrafo << "Fecho Transitivo Direto {\n";
 
     while (!pilha.empty())
     {
@@ -456,8 +456,8 @@ void Graph::fechoTransitivoDireto(int idNode, ofstream &saida)
             if (!visitado[aresta->getTargetId()]) //verifica se o no de destino da aresta ja foi visitado
             {
                 visitado[aresta->getTargetId()] = true;
-                cout << "\t" << no->getId() << " " << nodesSeparator << " " << aresta->getTargetId() << endl;
-                saida << "\t" << no->getId() << " " << nodesSeparator << " " << aresta->getTargetId() << "\n";
+                cout << "\t" << no->getId() << " " << seta << " " << aresta->getTargetId() << endl;
+                saida << "\t" << no->getId() << " " << seta << " " << aresta->getTargetId() << "\n";
                 pilha.push(aresta->getTargetId());
             }
         }
@@ -485,13 +485,13 @@ void Graph::fechoTransitivoIndireto(int idNode, ofstream &saida)
     stack<int> pilha;
     pilha.push(idNode);
 
-    string graphType;
-    string nodesSeparator;
+    string tipoGrafo;
+    string seta;
 
-    graphType = "digraph";
-    nodesSeparator = "->";
+    tipoGrafo = "digraph";
+    seta = "->";
 
-    saida << graphType << "Fecho Transitivo Direto {\n";
+    saida << tipoGrafo << "Fecho Transitivo Direto {\n";
 
     // Ate esvaziar a pilha
     while (!pilha.empty())
@@ -505,8 +505,8 @@ void Graph::fechoTransitivoIndireto(int idNode, ofstream &saida)
             // Verifica exstencia de arestas
             if (no->hasEdgeBetween(topo))
             {
-                cout << "\t" << no->getId() << " " << nodesSeparator << " " << topo << endl;
-                saida << "\t" << no->getId() << " " << nodesSeparator << " " << topo << "\n";
+                cout << "\t" << no->getId() << " " << seta << " " << topo << endl;
+                saida << "\t" << no->getId() << " " << seta << " " << topo << "\n";
                 pilha.push(no->getId());
             }
         }
@@ -618,23 +618,23 @@ void Graph::caminhamentoProfundidade(int x, ofstream &saida)
         verificavisitado[i] = false;
     }
 
-    string graphType;
-    string nodesSeparator;
+    string tipoGrafo;
+    string seta;
     if (this->directed)
     {
-        graphType = "digraph";
-        nodesSeparator = "->";
+        tipoGrafo = "digraph";
+        seta = "->";
     }
     else
     {
-        graphType = "graph";
-        nodesSeparator = "--";
+        tipoGrafo = "graph";
+        seta = "--";
     }
-    saida << graphType << " BuscaProfundidade {\n";
+    saida << tipoGrafo << " BuscaProfundidade {\n";
     cout << endl;
-    cout << graphType << " BuscaProfundidade {\n";
+    cout << tipoGrafo << " BuscaProfundidade {\n";
 
-    auxBuscaEmProfundidade(x, verificavisitado, saida, nodesSeparator);
+    auxBuscaEmProfundidade(x, verificavisitado, saida, seta);
 
     saida << "}";
     cout << "}";
@@ -647,7 +647,7 @@ void Graph::caminhamentoProfundidade(int x, ofstream &saida)
 //para gravar o resultado e uma string de -> ou --
 // e imprime o conjunto de arestas visitadas a partir do mesmo em um percurso em profundidade indicando,
 //para cada uma, se trata-se ou não de uma aresta de retorno
-void Graph::auxBuscaEmProfundidade(int x, bool *verificavisitado, ofstream &saida, string nodesSeparator)
+void Graph::auxBuscaEmProfundidade(int x, bool *verificavisitado, ofstream &saida, string seta)
 {
     verificavisitado[x] = true;
     Node *noAux = getNode(x);
@@ -656,15 +656,15 @@ void Graph::auxBuscaEmProfundidade(int x, bool *verificavisitado, ofstream &said
     {
         if (verificavisitado[arestaAux->getIdDestino()] == false)
         { // nao é aresta de retorno
-            saida << "\t" << noAux->getId() << " " << nodesSeparator << " " << arestaAux->getIdDestino() << "\n";
-            auxBuscaEmProfundidade(arestaAux->getIdDestino(), verificavisitado, saida, nodesSeparator);
-            cout << "\t" << noAux->getId() << " " << nodesSeparator << " " << arestaAux->getIdDestino() << "\n";
-            auxBuscaEmProfundidade(arestaAux->getIdDestino(), verificavisitado, saida, nodesSeparator);
+            saida << "\t" << noAux->getId() << " " << seta << " " << arestaAux->getIdDestino() << "\n";
+            auxBuscaEmProfundidade(arestaAux->getIdDestino(), verificavisitado, saida, seta);
+            cout << "\t" << noAux->getId() << " " << seta << " " << arestaAux->getIdDestino() << "\n";
+            auxBuscaEmProfundidade(arestaAux->getIdDestino(), verificavisitado, saida, seta);
         }
         else
         { //é aresta de retorno
-            saida << "\t" << noAux->getId() << " " << nodesSeparator << " " << arestaAux->getIdDestino() << " [style=dotted];\n";
-            cout << "\t" << noAux->getId() << " " << nodesSeparator << " " << arestaAux->getIdDestino() << " [style=dotted];\n";
+            saida << "\t" << noAux->getId() << " " << seta << " " << arestaAux->getIdDestino() << " [style=dotted];\n";
+            cout << "\t" << noAux->getId() << " " << seta << " " << arestaAux->getIdDestino() << " [style=dotted];\n";
         }
     }
 }
@@ -683,20 +683,20 @@ Graph *Graph::subGrafoInduzido(int *vet, int tam, ofstream &saida)
     Graph *subgrafo = new Graph(tam, this->directed, this->weighted_edge, this->weighted_node);
     Node *node = nodesList->getPrimeiro();
 
-    string graphType;
-    string nodesSeparator;
+    string tipoGrafo;
+    string seta;
     if (this->directed)
     {
-        graphType = "digraph";
-        nodesSeparator = "->";
+        tipoGrafo = "digraph";
+        seta = "->";
     }
     else
     {
-        graphType = "graph";
-        nodesSeparator = "--";
+        tipoGrafo = "graph";
+        seta = "--";
     }
 
-    saida << graphType << " SubgrafoInduzido {\n";
+    saida << tipoGrafo << " SubgrafoInduzido {\n";
 
     for (int i = 0; i < n; ++i)
     {
@@ -750,7 +750,7 @@ Graph *Graph::subGrafoInduzido(int *vet, int tam, ofstream &saida)
                             if (edge->getIdDestino() == vet[j]) //
                             {
                                 subgrafo->insertEdge(vet[i], vet[j], edge->getWeight());
-                                saida << "\t" << vet[i] << " " << nodesSeparator << " " << vet[j] << "\n";
+                                saida << "\t" << vet[i] << " " << seta << " " << vet[j] << "\n";
                             }
                             edge = edge->getNextEdge();
                         }
@@ -818,20 +818,20 @@ void Graph::kruskal(Graph *subgrafo, ofstream &saida)
         }
     }
 
-    string graphType;
-    string nodesSeparator;
+    string tipoGrafo;
+    string seta;
     if (this->directed)
     {
-        graphType = "digraph";
-        nodesSeparator = "->";
+        tipoGrafo = "digraph";
+        seta = "->";
     }
     else
     {
-        graphType = "graph";
-        nodesSeparator = "--";
+        tipoGrafo = "graph";
+        seta = "--";
     }
 
-    saida << graphType << " Kruskal {\n";
+    saida << tipoGrafo << " Kruskal {\n";
     const string quote = "\"";
 
     int sizeVetEdge = vetEdges.size();
@@ -840,7 +840,7 @@ void Graph::kruskal(Graph *subgrafo, ofstream &saida)
         int v1 = vetEdges[i].u->getId();
         int v2 = vetEdges[i].v->getId();
         cout << v1 << " " << v2 << endl;
-        saida << "\t" << v1 << " " << nodesSeparator << " "
+        saida << "\t" << v1 << " " << seta << " "
               << v2 << " [label" << quote << vetEdges[i].weight << quote << "]\n";
     }
 
@@ -1011,27 +1011,27 @@ void Graph::primMST(Graph *subgrafo, ofstream &saida)
         cont = cont + 1;
     }
 
-    string graphType;
-    string nodesSeparator;
+    string tipoGrafo;
+    string seta;
     if (subgrafo->getDirected())
     {
-        graphType = "digraph";
-        nodesSeparator = "->";
+        tipoGrafo = "digraph";
+        seta = "->";
     }
     else
     {
-        graphType = "graph";
-        nodesSeparator = "--";
+        tipoGrafo = "graph";
+        seta = "--";
     }
 
-    saida << graphType << " Prim {\n";
+    saida << tipoGrafo << " Prim {\n";
     const string quote = "\"";
 
     for (int l = 0; l < qtArestaSolucao; l++)
     {
         cout << "[" << solucao[l].origem << " -> " << solucao[l].destino << "] - "
              << solucao[l].peso << endl;
-        saida << "\t" << solucao[l].origem << " " << nodesSeparator << " "
+        saida << "\t" << solucao[l].origem << " " << seta << " "
               << solucao[l].destino << " [label" << quote << solucao[l].peso
               << quote << "]\n";
         somatorioPesos += solucao[l].peso;
@@ -1140,22 +1140,22 @@ void Graph::Floyd(int origem, int destino, ofstream &saida)
     //     cout << endl;
     // }
 
-    string graphType;
-    string nodesSeparator;
+    string tipoGrafo;
+    string seta;
     if (this->getDirected())
     {
-        graphType = "digraph";
-        nodesSeparator = "->";
+        tipoGrafo = "digraph";
+        seta = "->";
     }
     else
     {
-        graphType = "graph";
-        nodesSeparator = "--";
+        tipoGrafo = "graph";
+        seta = "--";
     }
     cout << endl;
     saida << "O caminho mais curto entre " << origem << " e " << destino << " tem comprimento: " << custo[origem][destino] << "\n";
     cout << "O caminho mais curto entre " << origem << " e " << destino << " tem comprimento: " << custo[origem][destino] << endl;
-    saida << graphType << " Floyd {\n";
+    saida << tipoGrafo << " Floyd {\n";
     const string quote = "\"";
 
     // cout << endl;
@@ -1175,8 +1175,8 @@ void Graph::Floyd(int origem, int destino, ofstream &saida)
     for (int i = 1; i < vet.size(); i++)
     {
         cout << "\t"
-             << "[" << vet[i - 1] << " " << nodesSeparator << " " << vet[i] << "]\n ";
-        saida << "\t" << vet[i - 1] << " " << nodesSeparator << " "
+             << "[" << vet[i - 1] << " " << seta << " " << vet[i] << "]\n ";
+        saida << "\t" << vet[i - 1] << " " << seta << " "
               << vet[i] << "\n";
     }
     saida << "}";
@@ -1286,30 +1286,30 @@ void Graph::dijkstra(int origem, int destino, ofstream &saida)
         }
     }
 
-    string graphType;
-    string nodesSeparator;
+    string tipoGrafo;
+    string seta;
     if (this->getDirected())
     {
-        graphType = "digraph";
-        nodesSeparator = "->";
+        tipoGrafo = "digraph";
+        seta = "->";
     }
     else
     {
-        graphType = "graph";
-        nodesSeparator = "--";
+        tipoGrafo = "graph";
+        seta = "--";
     }
 
     saida << "O caminho mais curto entre " << origem << " e " << destino << " tem comprimento: " << dist[destino] << "\n";
     cout << "O caminho mais curto entre " << origem << " e " << destino << " tem comprimento: " << dist[destino] << endl;
-    saida << graphType << " Dijkstra {\n";
+    saida << tipoGrafo << " Dijkstra {\n";
     const string quote = "\"";
 
     for (int l = destino; l != origem; l = caminho[l])
     {
         aux = l;
         cout << "\t"
-             << "[" << caminho[l] << " " << nodesSeparator << " " << aux << "]\n ";
-        saida << "\t" << caminho[l] << " " << nodesSeparator << " "
+             << "[" << caminho[l] << " " << seta << " " << aux << "]\n ";
+        saida << "\t" << caminho[l] << " " << seta << " "
               << aux << "\n";
     }
     saida << "}";
@@ -1323,13 +1323,14 @@ void Graph::greed(ofstream &saida)
     //Variaveis para armazenar o tempo do algoritmo
     clock_t tempoInicial, tempoFinal, tempoTotal;
     tempoInicial = clock();
-    int somaPesos = 0, componentesConexa = this->number_Groups;
+    float somaPesos = 0;
+    int componentesConexa = this->number_Groups;
 
     vector<Edge> vetEdges = this->arestasVet; //lista com arestas do grafo
     sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
     vector<Edge> solucao;                     //conjunto solucao de arestas
-    int *subArvore = new int(this->order);    // |V| subarvores contendo cada uma um no isolado
-    int *vGroup = new int(number_Groups);
+    int *subArvore = new int[this->order];    // |V| subarvores contendo cada uma um no isolado
+    int *vGroup = new int[number_Groups];
 
     // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
     //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0/-1)
@@ -1385,122 +1386,132 @@ void Graph::greed(ofstream &saida)
     saida << "graph Greedy {\n";
     for (int i = 0; i < solucao.size(); i++)
     {
-        saida << "\t" << solucao.at(i).getIdOrigem() << " -- " << solucao.at(i).getIdDestino() << " [label=" << solucao.at(i).getWeight() << "]\n";
+        saida << "\t" << solucao[i].getIdOrigem() << " -- " << solucao[i].getIdDestino() << " [label=" << solucao[i].getWeight() << "]\n";
     }
     saida << "}\n";
 }
 vector<Edge> Graph::constroiLCR(vector<Edge> vetEdges, float alpha)
 {
-    // vector<Edge> newLista;
-    // int cMin = 0, cMax = 0;
-    // for (int i = 0; i < vetEdges.size(); i++)
-    // {
-    //     cMin = vetEdges[i].getWeight();
-    //     cMax = vetEdges[vetEdges.size()].getWeight();
+    float cMin = vetEdges.begin()->getWeight();
+    float cMax = vetEdges.back().getWeight();
 
-    //     if (vetEdges[i].getWeight() <= (cMin + alpha * (cMax - cMin)))
-    //     {
-    //         newLista.push_back(vetEdges[i]);
-    //     }
-    // }
-    // return newLista;
-    float c_min = vetEdges.begin()->getWeight();
-    float c_max = vetEdges.back().getWeight();
-    float c_total = (c_min + (alpha * (c_max - c_min)));
-
-    vector<Edge> result;
+    vector<Edge> newLista;
     for (int i = 0; i < vetEdges.size(); i++)
     {
-        if (vetEdges[i].getWeight() <= c_total)
+        if (vetEdges[i].getWeight() <= (cMin + (alpha * (cMax - cMin))))
         {
-            result.push_back(vetEdges[i]);
+            newLista.push_back(vetEdges[i]);
         }
     }
 
-    return result;
+    return newLista;
 }
 void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
 {
-    //Variaveis para armazenar o tempo do algoritmo
-    clock_t tempoInicial, tempoFinal, tempoTotal;
-    tempoInicial = clock();
-    int somaPesos = 0, componentesConexa = this->number_Groups;
+    float bestPeso = 999999;
+    vector<Edge> solucaoBest;
 
-    vector<Edge> vetEdges = this->arestasVet; //lista com arestas do grafo
-    sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
-    vector<Edge> solucao;                     //conjunto solucao de arestas
-    int *subArvore = new int(this->order);    // |V| subarvores contendo cada uma um no isolado
-    int *vGroup = new int(number_Groups);
-    vector<Edge> LCR;
+    saida << "Alfa: " << alpha << "\n";
 
-    // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
-    //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0/-1)
-    memset(subArvore, -1, sizeof(int) * this->order);
-    memset(vGroup, 0, sizeof(int) * number_Groups);
-
-    while (componentesConexa > 1) //o algoritmo termina quando o Conjunto Solucao possui apenas uma componente conexa
+    for (int j = 0; j < iteracoes; j++)
     {
-        LCR = constroiLCR(vetEdges, alpha);
-        srand(time(NULL));
-        int val = rand() % LCR.size();
-        Edge edge = LCR[val];
+        clock_t tempoInicial, tempoFinal, tempoTotal; //Variaveis para armazenar o tempo do algoritmo
+        tempoInicial = clock();
+        float somaPesos = 0;
+        int componentesConexa = this->number_Groups;
+        vector<Edge> solucao;                     //conjunto solucao de arestas
+        vector<Edge> vetEdges = this->arestasVet; //lista com arestas do grafo
+        sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
 
-        for (int i = 0; i < vetEdges.size(); i++)
+        int *subArvore = new int[this->order]; // |V| subarvores contendo cada uma um no isolado
+        int *vGroup = new int[this->number_Groups];
+        vector<Edge> LCR;
+
+        // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
+        //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0/-1)
+        memset(subArvore, -1, sizeof(int) * this->order);
+        memset(vGroup, 0, sizeof(int) * this->number_Groups);
+
+        while (componentesConexa > 1) //o algoritmo termina quando o Conjunto Solucao possui apenas uma componente conexa
         {
-            if (vetEdges[i].getIdOrigem() == edge.getIdOrigem() && vetEdges[i].getIdDestino() == edge.getIdDestino())
+            LCR = constroiLCR(vetEdges, alpha);
+            srand(time(NULL));
+            int val = rand() % LCR.size();
+            Edge edge = LCR[val];
+
+            for (int i = 0; i < vetEdges.size(); i++)
             {
-                vetEdges.erase(vetEdges.begin() + i);
-            }
-        }
-
-        int u = buscar(subArvore, edge.getIdOrigem());
-        int v = buscar(subArvore, edge.getIdDestino());
-
-        // se forem diferentes é porque não formam ciclo, ou seja, nao estao na mesma subarvore
-        //entao podemos incluir a aresta no vetor, e depois marcar que as duas subarvores são uma
-        //única subarvore
-        if (u != v)
-        {
-            Node *vertice_U = getNode(edge.getIdOrigem());
-            Node *vertice_V = getNode(edge.getIdDestino());
-            if (vertice_U != nullptr && vertice_V != nullptr)
-            {
-                int gu = vertice_U->getGroupId();
-                int gv = vertice_V->getGroupId();
-
-                //Alem da deteccao de ciclos eh preciso verificar se os grupos gu e gv possuem vertices diferesnte
-                //de u e v na solucao
-                if ((vGroup[gu - 1] == vertice_U->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == vertice_V->getId() || vGroup[gv - 1] == 0))
+                if (vetEdges[i].getIdOrigem() == edge.getIdOrigem() && vetEdges[i].getIdDestino() == edge.getIdDestino())
                 {
-                    solucao.push_back(edge);
-                    somaPesos += edge.getWeight();
-                    unir(subArvore, u, v); // faz a união das subarvores que contem u e v
+                    vetEdges.erase(vetEdges.begin() + i);
+                }
+            }
 
-                    componentesConexa--;
-                    if (vGroup[gu - 1] == 0)
+            int u = buscar(subArvore, edge.getIdOrigem());
+            int v = buscar(subArvore, edge.getIdDestino());
+
+            // se forem diferentes é porque não formam ciclo, ou seja, nao estao na mesma subarvore
+            //entao podemos incluir a aresta no vetor, e depois marcar que as duas subarvores são uma única subarvore
+            if (u != v)
+            {
+                Node *vertice_U = getNode(edge.getIdOrigem());
+                Node *vertice_V = getNode(edge.getIdDestino());
+                if (vertice_U != nullptr && vertice_V != nullptr)
+                {
+                    int gu = vertice_U->getGroupId();
+                    int gv = vertice_V->getGroupId();
+
+                    //Alem da deteccao de ciclos eh preciso verificar se os grupos gu e gv possuem vertices diferesnte
+                    //de u e v na solucao
+                    if ((vGroup[gu - 1] == vertice_U->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == vertice_V->getId() || vGroup[gv - 1] == 0))
                     {
-                        vGroup[gu - 1] = vertice_U->getId();
-                    }
-                    if (vGroup[gv - 1] == 0)
-                    {
-                        vGroup[gv - 1] = vertice_V->getId();
+                        solucao.push_back(edge);
+                        somaPesos += edge.getWeight();
+                        unir(subArvore, u, v); // faz a união das subarvores que contem u e v
+
+                        componentesConexa--;
+                        if (vGroup[gu - 1] == 0)
+                        {
+                            vGroup[gu - 1] = vertice_U->getId();
+                        }
+                        if (vGroup[gv - 1] == 0)
+                        {
+                            vGroup[gv - 1] = vertice_V->getId();
+                        }
                     }
                 }
             }
         }
-    }
-    tempoFinal = clock();
-    tempoTotal = ((tempoFinal - tempoInicial) / (CLOCKS_PER_SEC / 1000));
+        if (somaPesos < bestPeso)
+        {
+            solucaoBest = solucao;
+            bestPeso = somaPesos;
+        }
 
-    saida << "Tempo: " << tempoTotal << "ms \n";
-    saida << "Total Peso: " << somaPesos << "\n";
+        tempoFinal = clock();
+        tempoTotal = ((tempoFinal - tempoInicial) / (CLOCKS_PER_SEC / 1000));
+        saida << "--------------------------- Iteracao: " << j + 1 << "\n";
+        saida << "Tempo: " << tempoTotal << "ms \n";
+        saida << "Total Peso: " << somaPesos << "\n";
+        saida << "graph Greedy Random {\n";
+        for (int i = 0; i < solucao.size(); i++)
+        {
+            saida << "\t" << solucao[i].getIdOrigem() << " -- " << solucao[i].getIdDestino() << " [label=" << solucao[i].getWeight() << "]\n";
+        }
+        saida << "}\n";
+        saida << "\n";
+    }
+    saida << "--------------------------------- MELHOR SOLUCAO ---------------------------------------------"
+          << "\n";
+    saida << "Melhor solucao Peso: " << bestPeso << "\n";
     saida << "graph Greedy Random {\n";
-    for (int i = 0; i < solucao.size(); i++)
+    for (int i = 0; i < solucaoBest.size(); i++)
     {
-        saida << "\t" << solucao.at(i).getIdOrigem() << " -- " << solucao.at(i).getIdDestino() << " [label=" << solucao.at(i).getWeight() << "]\n";
+        saida << "\t" << solucaoBest[i].getIdOrigem() << " -- " << solucaoBest[i].getIdDestino() << " [label=" << solucaoBest[i].getWeight() << "]\n";
     }
     saida << "}\n";
 }
+
 float Graph::greedRactiveRandom()
 {
 }
