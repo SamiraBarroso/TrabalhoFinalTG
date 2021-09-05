@@ -5,6 +5,7 @@
 #include <string.h>  // memset
 #include <string>
 #include <queue>
+#include <cmath>
 #include <time.h>
 // #include <bits/stdc++.h>
 #define INF 9999
@@ -1435,6 +1436,11 @@ void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
         while (componentesConexa > 1) //o algoritmo termina quando o Conjunto Solucao possui apenas uma componente conexa
         {
             LCR = constroiLCR(vetEdges, alpha);
+            /* srand(time(NULL)) objetiva inicializar o gerador de números aleatórios
+            com o valor da função time(NULL). Este por sua vez, é calculado
+            como sendo o total de segundos passados desde 1 de janeiro de 1970
+            até a data atual. Desta forma, a cada execução o valor da "semente" será diferente.
+            */
             srand(time(NULL));
             int val = rand() % LCR.size();
             Edge edge = LCR[val];
@@ -1511,7 +1517,189 @@ void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
     }
     saida << "}\n";
 }
-
-float Graph::greedRactiveRandom()
+void Graph::atualizaProb(float *vetProb, float *vetMedia, float *alpha, float bestPeso)
 {
+    float q[] = {0, 0, 0, 0, 0};
+    float acumulado = 0;
+
+    for (int i = 0; i < 5; ++i)
+    {
+        if (vetMedia[i] != 0)
+        {
+            q[i] = pow(bestPeso / vetMedia[i], 10);
+            acumulado += q[i];
+        }
+    }
+
+    // altera a probabilidade de cada alfa ser escolhido com base no q
+    for (int i = 0; i < 5; ++i)
+    {
+        if (q[i] != 0)
+            vetProb[i] = q[i] / acumulado;
+    }
+}
+
+int Graph::escolheAlfa(float *vetProb)
+{
+    float acumulado = 0;
+    srand(time(NULL));
+    float sorteado = rand() % 100; // sorteado recebe um número aleatório entre 0 e 100
+    //define, de acordo com o vetor de probabilidades e com o valor selecionado, qual será o alfa retornado
+    for (int i = 0; i < 5; ++i)
+    {
+        acumulado += vetProb[i] * 100;
+        if (sorteado <= acumulado)
+        {
+            acumulado = i;
+            break;
+        }
+    }
+
+    return ((int)acumulado);
+}
+
+float Graph::greedRactiveRandom(ofstream &saida, float *alpha, int iteracoes, int bloco)
+{
+    float bestPeso = 999999;
+    vector<Edge> solucaoBest;
+    float vetProb[] = {0.2, 0.2, 0.2, 0.2, 0.2};
+    float vetMedia[] = {0.0, 0.0, 0.0, 0.0, 0.0};
+    float custos[] = {0.0, 0.0, 0.0, 0.0, 0.0};
+    int contAlpha[] = {0, 0, 0, 0, 0};
+    float alphaEscolhido = 0, melhorAlpha = 0;
+    int posAlfa = 0;
+
+    for (int j = 0; j < iteracoes; j++)
+    {
+        clock_t tempoInicial, tempoFinal, tempoTotal; //Variaveis para armazenar o tempo do algoritmo
+        tempoInicial = clock();
+
+        if (j % bloco == 0)
+        {
+            atualizaProb(vetProb, vetMedia, alpha, bestPeso);
+            for (int i = 0; i < 5; i++)
+            {
+                cout << vetProb[i] << "  ";
+            }
+            cout << endl;
+        }
+
+        float somaPesos = 0;
+        int componentesConexa = this->number_Groups;
+        vector<Edge> solucao;                     //conjunto solucao de arestas
+        vector<Edge> vetEdges = this->arestasVet; //lista com arestas do grafo
+        sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
+
+        int *subArvore = new int[this->order]; // |V| subarvores contendo cada uma um no isolado
+        int *vGroup = new int[this->number_Groups];
+        vector<Edge> LCR;
+
+        // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
+        //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0/-1)
+        memset(subArvore, -1, sizeof(int) * this->order);
+        memset(vGroup, 0, sizeof(int) * this->number_Groups);
+
+        if (j < 5)
+        {
+            posAlfa = j;
+            alphaEscolhido = alpha[posAlfa];
+        }
+
+        else
+        {
+            posAlfa = escolheAlfa(vetProb);
+            alphaEscolhido = alpha[posAlfa];
+        }
+
+        while (componentesConexa > 1) //o algoritmo termina quando o Conjunto Solucao possui apenas uma componente conexa
+        {
+            LCR = constroiLCR(vetEdges, alphaEscolhido);
+            srand(time(NULL));
+            int val = rand() % LCR.size();
+            Edge edge = LCR[val];
+
+            for (int i = 0; i < vetEdges.size(); i++)
+            {
+                if (vetEdges[i].getIdOrigem() == edge.getIdOrigem() && vetEdges[i].getIdDestino() == edge.getIdDestino())
+                {
+                    vetEdges.erase(vetEdges.begin() + i);
+                }
+            }
+
+            int u = buscar(subArvore, edge.getIdOrigem());
+            int v = buscar(subArvore, edge.getIdDestino());
+
+            // se forem diferentes é porque não formam ciclo, ou seja, nao estao na mesma subarvore
+            //entao podemos incluir a aresta no vetor, e depois marcar que as duas subarvores são uma única subarvore
+            if (u != v)
+            {
+                Node *vertice_U = getNode(edge.getIdOrigem());
+                Node *vertice_V = getNode(edge.getIdDestino());
+                if (vertice_U != nullptr && vertice_V != nullptr)
+                {
+                    int gu = vertice_U->getGroupId();
+                    int gv = vertice_V->getGroupId();
+
+                    //Alem da deteccao de ciclos eh preciso verificar se os grupos gu e gv possuem vertices diferesnte
+                    //de u e v na solucao
+                    if ((vGroup[gu - 1] == vertice_U->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == vertice_V->getId() || vGroup[gv - 1] == 0))
+                    {
+                        solucao.push_back(edge);
+                        somaPesos += edge.getWeight();
+                        unir(subArvore, u, v); // faz a união das subarvores que contem u e v
+
+                        componentesConexa--;
+                        if (vGroup[gu - 1] == 0)
+                        {
+                            vGroup[gu - 1] = vertice_U->getId();
+                        }
+                        if (vGroup[gv - 1] == 0)
+                        {
+                            vGroup[gv - 1] = vertice_V->getId();
+                        }
+                    }
+                }
+            }
+        }
+        custos[posAlfa] += somaPesos;
+        contAlpha[posAlfa] += 1;
+        //atualiza melhores solucao e alfa
+        if (somaPesos < bestPeso)
+        {
+            solucaoBest = solucao;
+            bestPeso = somaPesos;
+            melhorAlpha = alphaEscolhido;
+        }
+        //atualiza vetor de médias
+        for (int k = 0; k < 5; ++k)
+        {
+            if (contAlpha[k] > 0)
+            {
+                vetMedia[k] = custos[k] / contAlpha[k];
+            }
+        }
+        tempoFinal = clock();
+        tempoTotal = ((tempoFinal - tempoInicial) / (CLOCKS_PER_SEC / 1000));
+        saida << "--------------------------- Iteracao: " << j + 1 << "\n";
+        saida << "Tempo: " << tempoTotal << "ms \n";
+        saida << "Total Peso: " << somaPesos << "\n";
+        saida << "Alpha : " << alphaEscolhido << "\n";
+        saida << "graph Greedy Random {\n";
+        for (int i = 0; i < solucao.size(); i++)
+        {
+            saida << "\t" << solucao[i].getIdOrigem() << " -- " << solucao[i].getIdDestino() << " [label=" << solucao[i].getWeight() << "]\n";
+        }
+        saida << "}\n";
+        saida << "\n";
+    }
+    saida << "--------------------------------- MELHOR SOLUCAO ---------------------------------------------"
+          << "\n";
+    saida << "Melhor solucao Peso: " << bestPeso << "\n";
+    saida << "Melhor Alfa: " << melhorAlpha << "\n";
+    saida << "graph Greedy Random {\n";
+    for (int i = 0; i < solucaoBest.size(); i++)
+    {
+        saida << "\t" << solucaoBest[i].getIdOrigem() << " -- " << solucaoBest[i].getIdDestino() << " [label=" << solucaoBest[i].getWeight() << "]\n";
+    }
+    saida << "}\n";
 }

@@ -125,7 +125,9 @@ public:
     void greed(ofstream &saida);
     vector<Edge> constroiLCR(vector<Edge> vetEdges, float alpha);
     void greedRandom(ofstream &saida, float alpha, int iteracoes);
-    float greedRactiveRandom();
+    void atualizaProb(float *vetProb, float *vetMedia, float *alpha, float bestPeso);
+    int escolheAlfa(float *vetProb);
+    float greedRactiveRandom(ofstream &saida, float *alpha, int iteracoes, int bloco);
 
 private:
     //Auxiliar methods
