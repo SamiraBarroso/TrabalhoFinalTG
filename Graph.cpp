@@ -1409,113 +1409,120 @@ vector<Edge> Graph::constroiLCR(vector<Edge> vetEdges, float alpha)
 }
 void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
 {
-    float bestPeso = 999999;
-    vector<Edge> solucaoBest;
-
-    saida << "Alfa: " << alpha << "\n";
-
-    for (int j = 0; j < iteracoes; j++)
+    for (int b = 1; b <= 10; b++)
     {
-        clock_t tempoInicial, tempoFinal, tempoTotal; //Variaveis para armazenar o tempo do algoritmo
-        tempoInicial = clock();
-        float somaPesos = 0;
-        int componentesConexa = this->number_Groups;
-        vector<Edge> solucao;                     //conjunto solucao de arestas
-        vector<Edge> vetEdges = this->arestasVet; //lista com arestas do grafo
-        sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
+        float bestPeso = 999999;
+        vector<Edge> solucaoBest;
+        clock_t tempo;
 
-        int *subArvore = new int[this->order]; // |V| subarvores contendo cada uma um no isolado
-        int *vGroup = new int[this->number_Groups];
-        vector<Edge> LCR;
+        saida << "Alfa: " << alpha << "\n";
 
-        // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
-        //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0/-1)
-        memset(subArvore, -1, sizeof(int) * this->order);
-        memset(vGroup, 0, sizeof(int) * this->number_Groups);
-
-        while (componentesConexa > 1) //o algoritmo termina quando o Conjunto Solucao possui apenas uma componente conexa
+        for (int j = 0; j < iteracoes; j++)
         {
-            LCR = constroiLCR(vetEdges, alpha);
-            /* srand(time(NULL)) objetiva inicializar o gerador de números aleatórios
+            clock_t tempoInicial, tempoFinal, tempoTotal; //Variaveis para armazenar o tempo do algoritmo
+            tempoInicial = clock();
+            float somaPesos = 0;
+            int componentesConexa = this->number_Groups;
+            vector<Edge> solucao;                     //conjunto solucao de arestas
+            vector<Edge> vetEdges = this->arestasVet; //lista com arestas do grafo
+            sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
+
+            int *subArvore = new int[this->order]; // |V| subarvores contendo cada uma um no isolado
+            int *vGroup = new int[this->number_Groups];
+            vector<Edge> LCR;
+
+            // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
+            //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0/-1)
+            memset(subArvore, -1, sizeof(int) * this->order);
+            memset(vGroup, 0, sizeof(int) * this->number_Groups);
+
+            while (componentesConexa > 1) //o algoritmo termina quando o Conjunto Solucao possui apenas uma componente conexa
+            {
+                LCR = constroiLCR(vetEdges, alpha);
+                /* srand(time(NULL)) objetiva inicializar o gerador de números aleatórios
             com o valor da função time(NULL). Este por sua vez, é calculado
             como sendo o total de segundos passados desde 1 de janeiro de 1970
             até a data atual. Desta forma, a cada execução o valor da "semente" será diferente.
             */
-            srand(time(NULL));
-            int val = rand() % LCR.size();
-            Edge edge = LCR[val];
+                srand(time(NULL));
+                int val = rand() % LCR.size();
+                Edge edge = LCR[val];
 
-            for (int i = 0; i < vetEdges.size(); i++)
-            {
-                if (vetEdges[i].getIdOrigem() == edge.getIdOrigem() && vetEdges[i].getIdDestino() == edge.getIdDestino())
+                for (int i = 0; i < vetEdges.size(); i++)
                 {
-                    vetEdges.erase(vetEdges.begin() + i);
-                }
-            }
-
-            int u = buscar(subArvore, edge.getIdOrigem());
-            int v = buscar(subArvore, edge.getIdDestino());
-
-            // se forem diferentes é porque não formam ciclo, ou seja, nao estao na mesma subarvore
-            //entao podemos incluir a aresta no vetor, e depois marcar que as duas subarvores são uma única subarvore
-            if (u != v)
-            {
-                Node *vertice_U = getNode(edge.getIdOrigem());
-                Node *vertice_V = getNode(edge.getIdDestino());
-                if (vertice_U != nullptr && vertice_V != nullptr)
-                {
-                    int gu = vertice_U->getGroupId();
-                    int gv = vertice_V->getGroupId();
-
-                    //Alem da deteccao de ciclos eh preciso verificar se os grupos gu e gv possuem vertices diferesnte
-                    //de u e v na solucao
-                    if ((vGroup[gu - 1] == vertice_U->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == vertice_V->getId() || vGroup[gv - 1] == 0))
+                    if (vetEdges[i].getIdOrigem() == edge.getIdOrigem() && vetEdges[i].getIdDestino() == edge.getIdDestino())
                     {
-                        solucao.push_back(edge);
-                        somaPesos += edge.getWeight();
-                        unir(subArvore, u, v); // faz a união das subarvores que contem u e v
+                        vetEdges.erase(vetEdges.begin() + i);
+                    }
+                }
 
-                        componentesConexa--;
-                        if (vGroup[gu - 1] == 0)
+                int u = buscar(subArvore, edge.getIdOrigem());
+                int v = buscar(subArvore, edge.getIdDestino());
+
+                // se forem diferentes é porque não formam ciclo, ou seja, nao estao na mesma subarvore
+                //entao podemos incluir a aresta no vetor, e depois marcar que as duas subarvores são uma única subarvore
+                if (u != v)
+                {
+                    Node *vertice_U = getNode(edge.getIdOrigem());
+                    Node *vertice_V = getNode(edge.getIdDestino());
+                    if (vertice_U != nullptr && vertice_V != nullptr)
+                    {
+                        int gu = vertice_U->getGroupId();
+                        int gv = vertice_V->getGroupId();
+
+                        //Alem da deteccao de ciclos eh preciso verificar se os grupos gu e gv possuem vertices diferesnte
+                        //de u e v na solucao
+                        if ((vGroup[gu - 1] == vertice_U->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == vertice_V->getId() || vGroup[gv - 1] == 0))
                         {
-                            vGroup[gu - 1] = vertice_U->getId();
-                        }
-                        if (vGroup[gv - 1] == 0)
-                        {
-                            vGroup[gv - 1] = vertice_V->getId();
+                            solucao.push_back(edge);
+                            somaPesos += edge.getWeight();
+                            unir(subArvore, u, v); // faz a união das subarvores que contem u e v
+
+                            componentesConexa--;
+                            if (vGroup[gu - 1] == 0)
+                            {
+                                vGroup[gu - 1] = vertice_U->getId();
+                            }
+                            if (vGroup[gv - 1] == 0)
+                            {
+                                vGroup[gv - 1] = vertice_V->getId();
+                            }
                         }
                     }
                 }
             }
-        }
-        if (somaPesos < bestPeso)
-        {
-            solucaoBest = solucao;
-            bestPeso = somaPesos;
-        }
 
-        tempoFinal = clock();
-        tempoTotal = ((tempoFinal - tempoInicial) / (CLOCKS_PER_SEC / 1000));
-        saida << "--------------------------- Iteracao: " << j + 1 << "\n";
-        saida << "Tempo: " << tempoTotal << "ms \n";
-        saida << "Total Peso: " << somaPesos << "\n";
-        saida << "graph Greedy Random {\n";
-        for (int i = 0; i < solucao.size(); i++)
-        {
-            saida << "\t" << solucao[i].getIdOrigem() << " -- " << solucao[i].getIdDestino() << " [label=" << solucao[i].getWeight() << "]\n";
+            tempoFinal = clock();
+            tempoTotal = ((tempoFinal - tempoInicial) / (CLOCKS_PER_SEC / 1000));
+            // saida << "--------------------------- Iteracao: " << j + 1 << "\n";
+            // saida << "Tempo: " << tempoTotal << "ms \n";
+            // saida << "Total Peso: " << somaPesos << "\n";
+            // saida << "graph Greedy Random {\n";
+            // for (int i = 0; i < solucao.size(); i++)
+            // {
+            //     saida << "\t" << solucao[i].getIdOrigem() << " -- " << solucao[i].getIdDestino() << " [label=" << solucao[i].getWeight() << "]\n";
+            // }
+            // saida << "}\n";
+            // saida << "\n";
+
+            if (somaPesos < bestPeso)
+            {
+                solucaoBest = solucao;
+                bestPeso = somaPesos;
+                tempo = tempoTotal;
+            }
         }
-        saida << "}\n";
-        saida << "\n";
+        saida << "--------------------------------- MELHOR SOLUCAO " << b << " ---------------------------------------------"
+              << "\n";
+        saida << "Tempo: " << tempo << "ms \n";
+        saida << "Melhor solucao Peso: " << bestPeso << "\n";
+        // saida << "graph Greedy Random {\n";
+        // for (int i = 0; i < solucaoBest.size(); i++)
+        // {
+        //     saida << "\t" << solucaoBest[i].getIdOrigem() << " -- " << solucaoBest[i].getIdDestino() << " [label=" << solucaoBest[i].getWeight() << "]\n";
+        // }
+        // saida << "}\n";
     }
-    saida << "--------------------------------- MELHOR SOLUCAO ---------------------------------------------"
-          << "\n";
-    saida << "Melhor solucao Peso: " << bestPeso << "\n";
-    saida << "graph Greedy Random {\n";
-    for (int i = 0; i < solucaoBest.size(); i++)
-    {
-        saida << "\t" << solucaoBest[i].getIdOrigem() << " -- " << solucaoBest[i].getIdDestino() << " [label=" << solucaoBest[i].getWeight() << "]\n";
-    }
-    saida << "}\n";
 }
 void Graph::atualizaProb(float *vetProb, float *vetMedia, float *alpha, float bestPeso)
 {
@@ -1560,146 +1567,149 @@ int Graph::escolheAlfa(float *vetProb)
 
 float Graph::greedRactiveRandom(ofstream &saida, float *alpha, int iteracoes, int bloco)
 {
-    float bestPeso = 999999;
-    vector<Edge> solucaoBest;
-    float vetProb[] = {0.2, 0.2, 0.2, 0.2, 0.2};
-    float vetMedia[] = {0.0, 0.0, 0.0, 0.0, 0.0};
-    float custos[] = {0.0, 0.0, 0.0, 0.0, 0.0};
-    int contAlpha[] = {0, 0, 0, 0, 0};
-    float alphaEscolhido = 0, melhorAlpha = 0;
-    int posAlfa = 0;
-
-    for (int j = 0; j < iteracoes; j++)
+    for (int b = 1; b <= 10; b++)
     {
-        clock_t tempoInicial, tempoFinal, tempoTotal; //Variaveis para armazenar o tempo do algoritmo
-        tempoInicial = clock();
+        float bestPeso = 999999;
+        vector<Edge> solucaoBest;
+        clock_t tempo;
+        float vetProb[] = {0.2, 0.2, 0.2, 0.2, 0.2};
+        float vetMedia[] = {0.0, 0.0, 0.0, 0.0, 0.0};
+        float custos[] = {0.0, 0.0, 0.0, 0.0, 0.0};
+        int contAlpha[] = {0, 0, 0, 0, 0};
+        float alphaEscolhido = 0, melhorAlpha = 0;
+        int posAlfa = 0;
 
-        if (j % bloco == 0)
+        for (int j = 0; j < iteracoes; j++)
         {
-            atualizaProb(vetProb, vetMedia, alpha, bestPeso);
-            for (int i = 0; i < 5; i++)
+            clock_t tempoInicial, tempoFinal, tempoTotal; //Variaveis para armazenar o tempo do algoritmo
+            tempoInicial = clock();
+
+            if (j % bloco == 0)
             {
-                cout << vetProb[i] << "  ";
-            }
-            cout << endl;
-        }
-
-        float somaPesos = 0;
-        int componentesConexa = this->number_Groups;
-        vector<Edge> solucao;                     //conjunto solucao de arestas
-        vector<Edge> vetEdges = this->arestasVet; //lista com arestas do grafo
-        sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
-
-        int *subArvore = new int[this->order]; // |V| subarvores contendo cada uma um no isolado
-        int *vGroup = new int[this->number_Groups];
-        vector<Edge> LCR;
-
-        // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
-        //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0/-1)
-        memset(subArvore, -1, sizeof(int) * this->order);
-        memset(vGroup, 0, sizeof(int) * this->number_Groups);
-
-        if (j < 5)
-        {
-            posAlfa = j;
-            alphaEscolhido = alpha[posAlfa];
-        }
-
-        else
-        {
-            posAlfa = escolheAlfa(vetProb);
-            alphaEscolhido = alpha[posAlfa];
-        }
-
-        while (componentesConexa > 1) //o algoritmo termina quando o Conjunto Solucao possui apenas uma componente conexa
-        {
-            LCR = constroiLCR(vetEdges, alphaEscolhido);
-            srand(time(NULL));
-            int val = rand() % LCR.size();
-            Edge edge = LCR[val];
-
-            for (int i = 0; i < vetEdges.size(); i++)
-            {
-                if (vetEdges[i].getIdOrigem() == edge.getIdOrigem() && vetEdges[i].getIdDestino() == edge.getIdDestino())
-                {
-                    vetEdges.erase(vetEdges.begin() + i);
-                }
+                atualizaProb(vetProb, vetMedia, alpha, bestPeso);
             }
 
-            int u = buscar(subArvore, edge.getIdOrigem());
-            int v = buscar(subArvore, edge.getIdDestino());
+            float somaPesos = 0;
+            int componentesConexa = this->number_Groups;
+            vector<Edge> solucao;                     //conjunto solucao de arestas
+            vector<Edge> vetEdges = this->arestasVet; //lista com arestas do grafo
+            sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
 
-            // se forem diferentes é porque não formam ciclo, ou seja, nao estao na mesma subarvore
-            //entao podemos incluir a aresta no vetor, e depois marcar que as duas subarvores são uma única subarvore
-            if (u != v)
+            int *subArvore = new int[this->order]; // |V| subarvores contendo cada uma um no isolado
+            int *vGroup = new int[this->number_Groups];
+            vector<Edge> LCR;
+
+            // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
+            //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0/-1)
+            memset(subArvore, -1, sizeof(int) * this->order);
+            memset(vGroup, 0, sizeof(int) * this->number_Groups);
+
+            if (j < 5)
             {
-                Node *vertice_U = getNode(edge.getIdOrigem());
-                Node *vertice_V = getNode(edge.getIdDestino());
-                if (vertice_U != nullptr && vertice_V != nullptr)
-                {
-                    int gu = vertice_U->getGroupId();
-                    int gv = vertice_V->getGroupId();
+                posAlfa = j;
+                alphaEscolhido = alpha[posAlfa];
+            }
 
-                    //Alem da deteccao de ciclos eh preciso verificar se os grupos gu e gv possuem vertices diferesnte
-                    //de u e v na solucao
-                    if ((vGroup[gu - 1] == vertice_U->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == vertice_V->getId() || vGroup[gv - 1] == 0))
+            else
+            {
+                posAlfa = escolheAlfa(vetProb);
+                alphaEscolhido = alpha[posAlfa];
+            }
+
+            while (componentesConexa > 1) //o algoritmo termina quando o Conjunto Solucao possui apenas uma componente conexa
+            {
+                LCR = constroiLCR(vetEdges, alphaEscolhido);
+                srand(time(NULL));
+                int val = rand() % LCR.size();
+                Edge edge = LCR[val];
+
+                for (int i = 0; i < vetEdges.size(); i++)
+                {
+                    if (vetEdges[i].getIdOrigem() == edge.getIdOrigem() && vetEdges[i].getIdDestino() == edge.getIdDestino())
                     {
-                        solucao.push_back(edge);
-                        somaPesos += edge.getWeight();
-                        unir(subArvore, u, v); // faz a união das subarvores que contem u e v
+                        vetEdges.erase(vetEdges.begin() + i);
+                    }
+                }
 
-                        componentesConexa--;
-                        if (vGroup[gu - 1] == 0)
+                int u = buscar(subArvore, edge.getIdOrigem());
+                int v = buscar(subArvore, edge.getIdDestino());
+
+                // se forem diferentes é porque não formam ciclo, ou seja, nao estao na mesma subarvore
+                //entao podemos incluir a aresta no vetor, e depois marcar que as duas subarvores são uma única subarvore
+                if (u != v)
+                {
+                    Node *vertice_U = getNode(edge.getIdOrigem());
+                    Node *vertice_V = getNode(edge.getIdDestino());
+                    if (vertice_U != nullptr && vertice_V != nullptr)
+                    {
+                        int gu = vertice_U->getGroupId();
+                        int gv = vertice_V->getGroupId();
+
+                        //Alem da deteccao de ciclos eh preciso verificar se os grupos gu e gv possuem vertices diferesnte
+                        //de u e v na solucao
+                        if ((vGroup[gu - 1] == vertice_U->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == vertice_V->getId() || vGroup[gv - 1] == 0))
                         {
-                            vGroup[gu - 1] = vertice_U->getId();
-                        }
-                        if (vGroup[gv - 1] == 0)
-                        {
-                            vGroup[gv - 1] = vertice_V->getId();
+                            solucao.push_back(edge);
+                            somaPesos += edge.getWeight();
+                            unir(subArvore, u, v); // faz a união das subarvores que contem u e v
+
+                            componentesConexa--;
+                            if (vGroup[gu - 1] == 0)
+                            {
+                                vGroup[gu - 1] = vertice_U->getId();
+                            }
+                            if (vGroup[gv - 1] == 0)
+                            {
+                                vGroup[gv - 1] = vertice_V->getId();
+                            }
                         }
                     }
                 }
             }
-        }
-        custos[posAlfa] += somaPesos;
-        contAlpha[posAlfa] += 1;
-        //atualiza melhores solucao e alfa
-        if (somaPesos < bestPeso)
-        {
-            solucaoBest = solucao;
-            bestPeso = somaPesos;
-            melhorAlpha = alphaEscolhido;
-        }
-        //atualiza vetor de médias
-        for (int k = 0; k < 5; ++k)
-        {
-            if (contAlpha[k] > 0)
+            custos[posAlfa] += somaPesos;
+            contAlpha[posAlfa] += 1;
+
+            //atualiza vetor de médias
+            for (int k = 0; k < 5; ++k)
             {
-                vetMedia[k] = custos[k] / contAlpha[k];
+                if (contAlpha[k] > 0)
+                {
+                    vetMedia[k] = custos[k] / contAlpha[k];
+                }
+            }
+            tempoFinal = clock();
+            tempoTotal = ((tempoFinal - tempoInicial) / (CLOCKS_PER_SEC / 1000));
+            // saida << "--------------------------- Iteracao: " << j + 1 << "\n";
+            // saida << "Tempo: " << tempoTotal << "ms \n";
+            // saida << "Total Peso: " << somaPesos << "\n";
+            // saida << "Alpha : " << alphaEscolhido << "\n";
+            // saida << "graph Greedy Random {\n";
+            // for (int i = 0; i < solucao.size(); i++)
+            // {
+            //     saida << "\t" << solucao[i].getIdOrigem() << " -- " << solucao[i].getIdDestino() << " [label=" << solucao[i].getWeight() << "]\n";
+            // }
+            // saida << "}\n";
+            // saida << "\n";
+
+            //atualiza melhores solucao e alfa
+            if (somaPesos < bestPeso)
+            {
+                solucaoBest = solucao;
+                bestPeso = somaPesos;
+                melhorAlpha = alphaEscolhido;
+                tempo = tempoTotal;
             }
         }
-        tempoFinal = clock();
-        tempoTotal = ((tempoFinal - tempoInicial) / (CLOCKS_PER_SEC / 1000));
-        saida << "--------------------------- Iteracao: " << j + 1 << "\n";
-        saida << "Tempo: " << tempoTotal << "ms \n";
-        saida << "Total Peso: " << somaPesos << "\n";
-        saida << "Alpha : " << alphaEscolhido << "\n";
-        saida << "graph Greedy Random {\n";
-        for (int i = 0; i < solucao.size(); i++)
-        {
-            saida << "\t" << solucao[i].getIdOrigem() << " -- " << solucao[i].getIdDestino() << " [label=" << solucao[i].getWeight() << "]\n";
-        }
-        saida << "}\n";
-        saida << "\n";
+        saida << "--------------------------------- MELHOR SOLUCAO " << b << "---------------------------------------------"
+              << "\n";
+        saida << "Tempo: " << tempo << "ms \n";
+        saida << "Melhor solucao Peso: " << bestPeso << "\n";
+        saida << "Melhor Alfa: " << melhorAlpha << "\n";
+        // saida << "graph Greedy Random {\n";
+        // for (int i = 0; i < solucaoBest.size(); i++)
+        // {
+        //     saida << "\t" << solucaoBest[i].getIdOrigem() << " -- " << solucaoBest[i].getIdDestino() << " [label=" << solucaoBest[i].getWeight() << "]\n";
+        // }
+        // saida << "}\n";
     }
-    saida << "--------------------------------- MELHOR SOLUCAO ---------------------------------------------"
-          << "\n";
-    saida << "Melhor solucao Peso: " << bestPeso << "\n";
-    saida << "Melhor Alfa: " << melhorAlpha << "\n";
-    saida << "graph Greedy Random {\n";
-    for (int i = 0; i < solucaoBest.size(); i++)
-    {
-        saida << "\t" << solucaoBest[i].getIdOrigem() << " -- " << solucaoBest[i].getIdDestino() << " [label=" << solucaoBest[i].getWeight() << "]\n";
-    }
-    saida << "}\n";
 }
