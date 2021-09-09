@@ -161,7 +161,8 @@ int numVertices(string &str, string n)
 {
     string vertice;
     int i = 0;
-    string s = str.substr(str.find_first_of(n[n.length() - 1]) + 1);
+    //string s = str.substr(str.find_first_of(n[n.length() - 1]) + 1);
+    string s = str.substr(n.length());
     while (s[i] != '.')
     {
 
@@ -377,7 +378,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         else
             cout << "Arquivo nao pode ser aberto" << endl;
         break;
-    }
+     }
     case 13: //Guloso Randomizado Reativo
     {
         string arquivo = "saidaResultados/test_guloso_Randomizado_Reativo.txt";
@@ -427,6 +428,7 @@ int mainMenu(ofstream &output_file, Graph *graph)
 
 int main(int argc, char const *argv[])
 {
+    cout << argv[0] << " " << argv[1] << " " << endl;
 
     //Verificação se todos os parâmetros do programa foram entrados
     if (argc != 6)
