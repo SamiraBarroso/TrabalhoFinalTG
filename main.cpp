@@ -146,7 +146,7 @@ int numGrupos(string &str)
 
     while (str[i] != '.')
     {
-        if (isdigit(str[i]) == 1)
+        if (isdigit(str[i]))
         {
             grupo += str[i];
         }
@@ -166,7 +166,7 @@ int numVertices(string &str, string n)
     while (s[i] != '.')
     {
 
-        if (isdigit(s[i]) == 1)
+        if (isdigit(s[i]))
             vertice += s[i];
 
         i++;
@@ -219,7 +219,7 @@ int menu()
     return selecao;
 }
 
-void selecionar(int selecao, Graph *graph, ofstream &output_file)
+void selecionar(int selecao, Graph *graph, ofstream &output_file, string file)
 {
 
     switch (selecao)
@@ -343,7 +343,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     }
     case 11: //Guloso
     {
-        string arquivo = "saidaResultados/test_guloso.txt";
+        string arquivo = "saidaResultados/test_guloso_" + file + ".txt";
         ofstream saida(arquivo);
 
         if (saida.is_open())
@@ -357,7 +357,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     }
     case 12: //Guloso Randomizado
     {
-        string arquivo = "saidaResultados/test_guloso_Randomizado.txt";
+        string arquivo = "saidaResultados/test_guloso_Randomizado_" + file + ".txt";
         ofstream saida(arquivo);
         float alpha;
         int iteracoes;
@@ -378,10 +378,10 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
         else
             cout << "Arquivo nao pode ser aberto" << endl;
         break;
-     }
+    }
     case 13: //Guloso Randomizado Reativo
     {
-        string arquivo = "saidaResultados/test_guloso_Randomizado_Reativo.txt";
+        string arquivo = "saidaResultados/test_guloso_Randomizado_Reativo_" + file + ".txt";
         ofstream saida(arquivo);
         float alpha[] = {0.05, 0.1, 0.15, 0.3, 0.5};
         int iteracoes;
@@ -408,7 +408,7 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file)
     }
 }
 
-int mainMenu(ofstream &output_file, Graph *graph)
+int mainMenu(ofstream &output_file, string file, Graph *graph)
 {
     int selecao = 1;
     while (selecao != 0)
@@ -417,7 +417,7 @@ int mainMenu(ofstream &output_file, Graph *graph)
         selecao = menu();
 
         if (output_file.is_open())
-            selecionar(selecao, graph, output_file);
+            selecionar(selecao, graph, output_file, file);
         else
             cout << "Unable to open the output_file" << endl;
 
@@ -464,7 +464,7 @@ int main(int argc, char const *argv[])
         // graph.print();
         graph = leitura2(input_file_name, input_file, atoi(argv[3]), atoi(argv[4]), atoi(argv[5]));
         // Chamando main menu
-        mainMenu(output_file, graph);
+        mainMenu(output_file, input_file_name, graph);
     }
     else
         cout << "Não foi possível abrir o arquivo de entrada! " << argv[1];

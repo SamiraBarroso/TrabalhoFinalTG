@@ -1331,12 +1331,12 @@ void Graph::greed(ofstream &saida)
     sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
     vector<Edge> solucao;                     //conjunto solucao de arestas
     int *subArvore = new int[this->order];    // |V| subarvores contendo cada uma um no isolado
-    int *vGroup = new int[number_Groups];
+    int *vGroup = new int[this->number_Groups];
 
     // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
     //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0/-1)
     memset(subArvore, -1, sizeof(int) * this->order);
-    memset(vGroup, 0, sizeof(int) * number_Groups);
+    memset(vGroup, 0, sizeof(int) * this->number_Groups);
 
     while (componentesConexa > 1) //o algoritmo termina quando o Conjunto Solucao possui apenas uma componente conexa
     {
@@ -1390,6 +1390,9 @@ void Graph::greed(ofstream &saida)
         saida << "\t" << solucao[i].getIdOrigem() << " -- " << solucao[i].getIdDestino() << " [label=" << solucao[i].getWeight() << "]\n";
     }
     saida << "}\n";
+
+    delete[] subArvore;
+    delete[] vGroup;
 }
 vector<Edge> Graph::constroiLCR(vector<Edge> vetEdges, float alpha)
 {
@@ -1511,6 +1514,9 @@ void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
                 bestPeso = somaPesos;
                 tempo = tempoTotal;
             }
+
+            delete[] subArvore;
+            delete[] vGroup;
         }
         saida << "--------------------------------- MELHOR SOLUCAO " << b << " ---------------------------------------------"
               << "\n";
@@ -1699,6 +1705,9 @@ float Graph::greedRactiveRandom(ofstream &saida, float *alpha, int iteracoes, in
                 melhorAlpha = alphaEscolhido;
                 tempo = tempoTotal;
             }
+
+            delete[] subArvore;
+            delete[] vGroup;
         }
         saida << "--------------------------------- MELHOR SOLUCAO " << b << "---------------------------------------------"
               << "\n";
