@@ -1319,6 +1319,7 @@ void Graph::dijkstra(int origem, int destino, ofstream &saida)
 /////////////////////////////////////////////////////////ALGORITMO GULOSO/////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//Algoritmo construtivo baseado em Kruskal para solucionar a PAGMG
 void Graph::greed(ofstream &saida)
 {
     //Variaveis para armazenar o tempo do algoritmo
@@ -1327,21 +1328,21 @@ void Graph::greed(ofstream &saida)
     float somaPesos = 0;
     int componentesConexa = this->number_Groups;
 
-    vector<Edge> vetEdges = this->arestasVet; //lista com arestas do grafo
-    sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
-    vector<Edge> solucao;                     //conjunto solucao de arestas
-    int *subArvore = new int[this->order];    // |V| subarvores contendo cada uma um no isolado
-    int *vGroup = new int[this->number_Groups];
+    vector<Edge> vetEdges = this->arestasVet;   //lista com arestas do grafo
+    sort(vetEdges.begin(), vetEdges.end());     //Lista com as arestas ordenadas em ordem crescente de pesos
+    vector<Edge> solucao;                       //conjunto solucao de arestas
+    int *subArvore = new int[this->order];      // |V| subarvores contendo cada uma um no isolado
+    int *vGroup = new int[this->number_Groups]; //vetor de grupo de vertices
 
     // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
     //para os n primeiros caracteres da string apontada por str. (seta todo mundo para 0/-1)
     memset(subArvore, -1, sizeof(int) * this->order);
-    memset(vGroup, 0, sizeof(int) * this->number_Groups);
+    memset(vGroup, 0, sizeof(int) * this->number_Groups); //nenhum grupo possui vertice selecionado, entao vGroup[i] = 0
 
     while (componentesConexa > 1) //o algoritmo termina quando o Conjunto Solucao possui apenas uma componente conexa
     {
-        Edge edge = vetEdges.front();
-        vetEdges.erase(vetEdges.begin());
+        Edge edge = vetEdges.front();     //pega a a primeira aresta da lista candidatos
+        vetEdges.erase(vetEdges.begin()); //retira ela da lista
 
         int u = buscar(subArvore, edge.getIdOrigem());
         int v = buscar(subArvore, edge.getIdDestino());
@@ -1351,7 +1352,7 @@ void Graph::greed(ofstream &saida)
         //única subarvore
         if (u != v)
         {
-            Node *vertice_U = getNode(edge.getIdOrigem());
+            Node *vertice_U = getNode(edge.getIdOrigem()); //pega os vertices extremos da aresta selecionada
             Node *vertice_V = getNode(edge.getIdDestino());
             if (vertice_U != nullptr && vertice_V != nullptr)
             {
@@ -1362,12 +1363,12 @@ void Graph::greed(ofstream &saida)
                 //de u e v na solucao
                 if ((vGroup[gu - 1] == vertice_U->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == vertice_V->getId() || vGroup[gv - 1] == 0))
                 {
-                    solucao.push_back(edge);
-                    somaPesos += edge.getWeight();
-                    unir(subArvore, u, v); // faz a união das subarvores que contem u e v
+                    solucao.push_back(edge);       //adiciona no conjunto solucao
+                    somaPesos += edge.getWeight(); //atualiza total do custo
+                    unir(subArvore, u, v);         // faz a união das subarvores que contem u e v
 
                     componentesConexa--;
-                    if (vGroup[gu - 1] == 0)
+                    if (vGroup[gu - 1] == 0) //verificacoes para saber se o grupo na posicao gu-1 ja possui vertice selicionado
                     {
                         vGroup[gu - 1] = vertice_U->getId();
                     }
@@ -1384,20 +1385,25 @@ void Graph::greed(ofstream &saida)
 
     saida << "Tempo: " << tempoTotal << "ms \n";
     saida << "Total Peso: " << somaPesos << "\n";
-    saida << "graph Greedy {\n";
-    for (int i = 0; i < solucao.size(); i++)
-    {
-        saida << "\t" << solucao[i].getIdOrigem() << " -- " << solucao[i].getIdDestino() << " [label=" << solucao[i].getWeight() << "]\n";
-    }
-    saida << "}\n";
+    //saida << "graph Greedy {\n";
+    // for (int i = 0; i < solucao.size(); i++)
+    // {
+    //     saida << "\t" << solucao[i].getIdOrigem() << " -- " << solucao[i].getIdDestino() << " [label=" << solucao[i].getWeight() << "]\n";
+    // }
+    //saida << "}\n";
 
     delete[] subArvore;
     delete[] vGroup;
 }
+
+//Funcao para contruir a lista de candidatos restrita, que sera composta de todas as arestas
+//cujo custo seja menor ou igual a custo de aresta minimo + alfa * ( custo de aresta maximo + custo minimo)
+//recebe o vetor de arestas ordenado pelo custo e um valor de alfa
+//retorna a lista de candidatos
 vector<Edge> Graph::constroiLCR(vector<Edge> vetEdges, float alpha)
 {
-    float cMin = vetEdges.begin()->getWeight();
-    float cMax = vetEdges.back().getWeight();
+    float cMin = vetEdges.begin()->getWeight(); //menor custo das arestas
+    float cMax = vetEdges.back().getWeight();   //maior custo das arestas
 
     vector<Edge> newLista;
     for (int i = 0; i < vetEdges.size(); i++)
@@ -1410,6 +1416,10 @@ vector<Edge> Graph::constroiLCR(vector<Edge> vetEdges, float alpha)
 
     return newLista;
 }
+
+//Algoritmo construtivo aleatorio baseado em Kruskal para solucionar a PAGMG
+// recebe a quantidade de iteraçoes para ser exeecutado e valor de alfa indicando
+//quao gulosa sera a selecao de candidatos
 void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
 {
     for (int b = 1; b <= 10; b++)
@@ -1422,6 +1432,7 @@ void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
 
         for (int j = 0; j < iteracoes; j++)
         {
+            //cout << "Iteracao: " << j << endl;
             clock_t tempoInicial, tempoFinal, tempoTotal; //Variaveis para armazenar o tempo do algoritmo
             tempoInicial = clock();
             float somaPesos = 0;
@@ -1430,8 +1441,8 @@ void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
             vector<Edge> vetEdges = this->arestasVet; //lista com arestas do grafo
             sort(vetEdges.begin(), vetEdges.end());   //Lista com as arestas ordenadas em ordem crescente de pesos
 
-            int *subArvore = new int[this->order]; // |V| subarvores contendo cada uma um no isolado
-            int *vGroup = new int[this->number_Groups];
+            int *subArvore = new int[this->order];      // |V| subarvores contendo cada uma um no isolado
+            int *vGroup = new int[this->number_Groups]; //vetor de grupo de vertices
             vector<Edge> LCR;
 
             // A função da biblioteca C memset(str, c, n) copia o caracter c (um unsigned char)
@@ -1448,7 +1459,7 @@ void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
             até a data atual. Desta forma, a cada execução o valor da "semente" será diferente.
             */
                 srand(time(NULL));
-                int val = rand() % LCR.size();
+                int val = rand() % LCR.size(); //selecionar um elemento de LCR aleatoriamente
                 Edge edge = LCR[val];
 
                 for (int i = 0; i < vetEdges.size(); i++)
@@ -1477,12 +1488,12 @@ void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
                         //de u e v na solucao
                         if ((vGroup[gu - 1] == vertice_U->getId() || vGroup[gu - 1] == 0) && (vGroup[gv - 1] == vertice_V->getId() || vGroup[gv - 1] == 0))
                         {
-                            solucao.push_back(edge);
-                            somaPesos += edge.getWeight();
-                            unir(subArvore, u, v); // faz a união das subarvores que contem u e v
+                            solucao.push_back(edge);       //adiciona no cojunto solucao
+                            somaPesos += edge.getWeight(); //atualiza total do custo
+                            unir(subArvore, u, v);         // faz a união das subarvores que contem u e v
 
                             componentesConexa--;
-                            if (vGroup[gu - 1] == 0)
+                            if (vGroup[gu - 1] == 0) //verificacoes para saber se o grupo na posicao gu-1 ja possui vertice selicionado
                             {
                                 vGroup[gu - 1] = vertice_U->getId();
                             }
@@ -1508,6 +1519,7 @@ void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
             // saida << "}\n";
             // saida << "\n";
 
+            // Compara o custo de uma iteracao com o melhor custo e atualiza se for menor
             if (somaPesos < bestPeso)
             {
                 solucaoBest = solucao;
@@ -1530,6 +1542,8 @@ void Graph::greedRandom(ofstream &saida, float alpha, int iteracoes)
         // saida << "}\n";
     }
 }
+
+//Funcao para atualizar o vetor de probabilidades
 void Graph::atualizaProb(float *vetProb, float *vetMedia, float *alpha, float bestPeso)
 {
     float q[] = {0, 0, 0, 0, 0};
@@ -1552,6 +1566,8 @@ void Graph::atualizaProb(float *vetProb, float *vetMedia, float *alpha, float be
     }
 }
 
+//Funcao para escolher o alfa
+//retorna o id para escolha do alfa
 int Graph::escolheAlfa(float *vetProb)
 {
     float acumulado = 0;
@@ -1571,6 +1587,9 @@ int Graph::escolheAlfa(float *vetProb)
     return ((int)acumulado);
 }
 
+//Algoritmo construtivo aleatorio reativo baseado em Kruskal para solucionar a PAGMG
+// recebe a quantidade de iteraçoes para ser exeecutado, um vetor contendo valores de alfa indicando
+//quao gulosa sera a selecao de candidatos eo tamanho do bloco para atualizar as probabilidades de escolha do alfa
 float Graph::greedRactiveRandom(ofstream &saida, float *alpha, int iteracoes, int bloco)
 {
     for (int b = 1; b <= 10; b++)
@@ -1587,6 +1606,7 @@ float Graph::greedRactiveRandom(ofstream &saida, float *alpha, int iteracoes, in
 
         for (int j = 0; j < iteracoes; j++)
         {
+            //cout << "Iteracao: " << j << endl;
             clock_t tempoInicial, tempoFinal, tempoTotal; //Variaveis para armazenar o tempo do algoritmo
             tempoInicial = clock();
 
@@ -1610,13 +1630,14 @@ float Graph::greedRactiveRandom(ofstream &saida, float *alpha, int iteracoes, in
             memset(subArvore, -1, sizeof(int) * this->order);
             memset(vGroup, 0, sizeof(int) * this->number_Groups);
 
+            //as primeiras 5 iteracoes sao feitas com cada alfa do vetor para completar o vetor de media
             if (j < 5)
             {
                 posAlfa = j;
                 alphaEscolhido = alpha[posAlfa];
             }
 
-            else
+            else //apos o vetor de media estar completo, a escolha do alfa sera feita dependendo da probabilidade
             {
                 posAlfa = escolheAlfa(vetProb);
                 alphaEscolhido = alpha[posAlfa];

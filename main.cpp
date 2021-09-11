@@ -179,8 +179,6 @@ Graph *leitura2(string &input_file_name, ifstream &input_file,
 {
     //Armazenando em uma string o tipo do arquivo(txt, clu, gr3 ...)
     string tipoArquivo = input_file_name.substr(input_file_name.find_first_of(".") + 1);
-    cout << input_file_name << "\n";
-    cout << tipoArquivo << "\n";
 
     if (tipoArquivo == "txt") //se for txt faz a leitura das instancias normal, como no trabalho 1
         return leitura(input_file, directed, weightedEdge, weightedNode);
@@ -343,61 +341,47 @@ void selecionar(int selecao, Graph *graph, ofstream &output_file, string file)
     }
     case 11: //Guloso
     {
-        string arquivo = "saidaResultados/test_guloso_" + file + ".txt";
-        ofstream saida(arquivo);
+        output_file << "Algoritmo Guloso Resultados para " << file << "\n";
+        graph->greed(output_file);
 
-        if (saida.is_open())
-        {
-            graph->greed(saida);
-            saida.close();
-        }
-        else
-            cout << "Arquivo nao pode ser aberto" << endl;
         break;
     }
     case 12: //Guloso Randomizado
     {
-        string arquivo = "saidaResultados/test_guloso_Randomizado_" + file + ".txt";
-        ofstream saida(arquivo);
+
         float alpha;
         int iteracoes;
 
-        if (saida.is_open())
-        {
-            cout << "Escolha um valor de alpha: " << endl;
-            cin >> alpha;
-            cout << "Escolha a quantidade de iteracoes: " << endl;
-            cin >> iteracoes;
+        cout << "Escolha um valor de alpha: " << endl;
+        cin >> alpha;
+        cout << "Escolha a quantidade de iteracoes: " << endl;
+        cin >> iteracoes;
 
-            if (alpha > 0 && alpha < 1)
-                graph->greedRandom(saida, alpha, iteracoes);
-            else
-                cout << "Alpha invalido! Alpha deve estar entre 0 e 1." << endl;
-            saida.close();
+        if (alpha > 0 && alpha < 1)
+        {
+            output_file << "Algoritmo Guloso Randomizado " << file << " para alfa = " << alpha << "\n";
+            graph->greedRandom(output_file, alpha, iteracoes);
         }
+
         else
-            cout << "Arquivo nao pode ser aberto" << endl;
+            cout << "Alpha invalido! Alpha deve estar entre 0 e 1." << endl;
+
         break;
     }
     case 13: //Guloso Randomizado Reativo
     {
-        string arquivo = "saidaResultados/test_guloso_Randomizado_Reativo_" + file + ".txt";
-        ofstream saida(arquivo);
+
         float alpha[] = {0.05, 0.1, 0.15, 0.3, 0.5};
         int iteracoes;
         int bloco;
 
-        if (saida.is_open())
-        {
-            cout << "Escolha a quantidade de iteracoes: " << endl;
-            cin >> iteracoes;
-            cout << "Escolha o tamanho do bloco: " << endl;
-            cin >> bloco;
-            graph->greedRactiveRandom(saida, alpha, iteracoes, bloco);
-            saida.close();
-        }
-        else
-            cout << "Arquivo nao pode ser aberto" << endl;
+        cout << "Escolha a quantidade de iteracoes: " << endl;
+        cin >> iteracoes;
+        cout << "Escolha o tamanho do bloco: " << endl;
+        cin >> bloco;
+        output_file << "Algoritmo Guloso Randomizado Reativo  " << file << "\n";
+        graph->greedRactiveRandom(output_file, alpha, iteracoes, bloco);
+
         break;
     }
     default:
